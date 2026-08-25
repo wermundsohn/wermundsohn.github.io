@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPMP — Detailed Sub-Steps & Decision Gates</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Epilogue:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #2d2d44;
+  --ink3: #3d3d5c;
+  --paper: #fafaf7;
+  --paper2: #f2f2ec;
+  --paper3: #e8e8df;
+  --amber: #c47b1a;
+  --amber2: #e8950f;
+  --amber-light: #fff8ed;
+  --amber-border: #fad28c;
+  --red: #b91c1c;
+  --red-light: #fef2f2;
+  --red-border: #fca5a5;
+  --green: #166534;
+  --green-light: #f0fdf4;
+  --green-border: #86efac;
+  --blue: #1e3a8a;
+  --blue-light: #eff6ff;
+  --blue-border: #93c5fd;
+  --violet: #5b21b6;
+  --violet-light: #f5f3ff;
+  --violet-border: #c4b5fd;
+  --teal: #134e4a;
+  --teal-light: #f0fdfa;
+  --teal-border: #5eead4;
+  --muted: #7a7a8c;
+  --border: #e2e2d8;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Epilogue', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── MASTHEAD ── */
+.masthead {
+  background: var(--ink);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.masthead::after {
+  content: 'PPMP';
+  position: absolute;
+  right: -20px; top: -30px;
+  font-family: 'Instrument Serif', serif;
+  font-size: 180px;
+  color: rgba(255,255,255,0.03);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.masthead-inner {
+  padding: 40px 52px 32px;
+  position: relative;
+  z-index: 1;
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 18px;
+}
+.breadcrumb span { color: rgba(255,255,255,0.6); }
+.breadcrumb .sep { opacity: 0.3; }
+.masthead h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.15;
+  max-width: 640px;
+}
+.masthead h1 em {
+  font-style: italic;
+  color: #fcd34d;
+}
+.masthead-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.mp-law { background: rgba(250,210,140,0.15); color: #fcd34d; border: 1px solid rgba(250,210,140,0.2); }
+.mp-phase { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1); }
+
+/* ── INTRO BAR ── */
+.intro-bar {
+  background: var(--amber-light);
+  border-bottom: 2px solid var(--amber-border);
+  padding: 16px 52px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.intro-bar-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.intro-bar-text { font-size: 13.5px; color: #78350f; line-height: 1.55; }
+.intro-bar-text strong { color: #92400e; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 200px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── TOC SIDEBAR ── */
+.toc {
+  border-right: 1px solid var(--border);
+  padding: 32px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--paper2);
+}
+.toc-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 16px 24px 8px;
+}
+.toc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 24px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+}
+.toc-item:hover { background: var(--paper3); }
+.toc-item.active {
+  background: var(--amber-light);
+  border-left-color: var(--amber2);
+}
+.toc-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 18px;
+  margin-top: 2px;
+}
+.toc-item.active .toc-num { color: var(--amber); }
+.toc-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink3);
+  line-height: 1.35;
+}
+.toc-item.active .toc-label { color: var(--amber); font-weight: 600; }
+.toc-item.is-decision .toc-label { color: var(--red); }
+.toc-item.is-decision .toc-num { color: var(--red); }
+
+/* ── MAIN CONTENT ── */
+.content {
+  padding: 40px 52px 80px;
+  max-width: 860px;
+}
+
+/* ── SECTION INTRO ── */
+.content-section {
+  margin-bottom: 56px;
+  scroll-margin-top: 24px;
+}
+
+/* ── PPMP ITEM CARD ── */
+.ppmp-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.ppmp-item:hover { box-shadow: var(--shadow-md); }
+
+.ppmp-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--paper2);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.ppmp-item-header:hover { background: var(--paper3); }
+
+.item-num-badge {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+  font-family: 'Epilogue', sans-serif;
+}
+
+.item-header-text { flex: 1; }
+.item-field-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 19px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.item-field-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.item-toggle {
+  color: var(--muted);
+  font-size: 12px;
+  padding-top: 6px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.ppmp-item.open .item-toggle { transform: rotate(180deg); }
+
+.ppmp-item-body {
+  display: none;
+  padding: 0;
+}
+.ppmp-item.open .ppmp-item-body { display: block; }
+
+/* ── INNER SECTIONS ── */
+.body-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.body-section:last-child { border-bottom: none; }
+
+.body-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Description prose */
+.prose {
+  font-size: 13.5px;
+  color: var(--ink3);
+  line-height: 1.65;
+}
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose em { font-style: italic; color: var(--ink2); }
+
+/* Substep list */
+.substep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.substep {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--ink3);
+  line-height: 1.5;
+  transition: background 0.15s;
+}
+.substep:hover { background: var(--paper2); }
+.substep-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.substep-text strong { color: var(--ink); font-weight: 600; }
+.substep-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* Decision gate */
+.decision-gate {
+  border: 1px solid var(--red-border);
+  border-radius: 10px;
+  background: var(--red-light);
+  overflow: hidden;
+  margin-top: 4px;
+}
+.decision-gate-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(185,28,28,0.05);
+  border-bottom: 1px solid var(--red-border);
+}
+.decision-gate-header .dg-icon { font-size: 16px; }
+.decision-gate-header .dg-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.decision-gate-header .dg-question {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--red);
+  margin-left: 4px;
+}
+.decision-paths-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+@media (max-width: 600px) { .decision-paths-grid { grid-template-columns: 1fr; } }
+.decision-path-block {
+  padding: 14px 16px;
+  border-right: 1px solid var(--red-border);
+}
+.decision-path-block:last-child { border-right: none; }
+.dpb-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.outcome-yes { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+.outcome-no { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
+.outcome-maybe { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.dpb-label { font-size: 11px; font-weight: 700; color: var(--ink2); margin-bottom: 4px; }
+.dpb-actions {
+  list-style: none;
+  padding: 0;
+}
+.dpb-actions li {
+  font-size: 12px;
+  color: var(--ink3);
+  padding: 2px 0;
+  padding-left: 12px;
+  position: relative;
+  line-height: 1.4;
+}
+.dpb-actions li::before { content: '→'; position: absolute; left: 0; color: var(--muted); font-size: 10px; top: 3px; }
+
+/* Rule / regulation box */
+.rule-box {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.rule-box.rb-law { background: var(--amber-light); border: 1px solid var(--amber-border); color: #78350f; }
+.rule-box.rb-tip { background: var(--blue-light); border: 1px solid var(--blue-border); color: #1e3a8a; }
+.rule-box.rb-warn { background: var(--red-light); border: 1px solid var(--red-border); color: #7f1d1d; }
+.rule-box.rb-ok { background: var(--green-light); border: 1px solid var(--green-border); color: #14532d; }
+.rule-box.rb-system { background: var(--teal-light); border: 1px solid var(--teal-border); color: #134e4a; }
+.rule-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.rule-text strong { font-weight: 700; }
+
+/* Tag row */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.tag-law { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.tag-doc { background: var(--blue-light); color: #3b82f6; border: 1px solid var(--blue-border); }
+.tag-sys { background: var(--teal-light); color: #0f766e; border: 1px solid var(--teal-border); }
+.tag-warn { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
+
+/* Two-col grid */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Info box */
+.info-box {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.info-box h5 {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li {
+  font-size: 12.5px;
+  color: var(--ink3);
+  padding: 3px 0;
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.45;
+}
+.info-box ul li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--amber2);
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Section header divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 48px 0 28px;
+}
+.section-divider-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.section-divider-text h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.section-divider-text p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Scrollbar */
+.toc::-webkit-scrollbar { width: 3px; }
+.toc::-webkit-scrollbar-thumb { background: var(--border); }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* Active highlight state */
+.ppmp-item.highlighted { border-color: var(--amber2); }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .toc { display: none; }
+  .content { padding: 28px 24px 60px; }
+  .masthead-inner { padding: 28px 24px 24px; }
+  .intro-bar { padding: 14px 24px; }
+}
+
+/* ── My custom styles ── */
+.my-link {
+    color: #fcd34d;
+    text-decoration: none !important;
+  }
+  .float-l {
+  	display: inline-block;
+    float: left;
+  }
+  .float-r {
+  	display: inline-block;
+    float: right;
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="breadcrumb">
+      Phase 1 <span class="sep">›</span> <a class="my-link" href="procurement_flow_ra12009.html" target="_self">[ &lt; Back to ] Procurement Planning</a> <span class="sep">›</span> <span>Step 3 — PPMP</span>
+    </div>
+    <h1>Prepare the <em>Project Procurement<br>Management Plan</em></h1>
+    <div class="masthead-meta">
+      <span class="meta-pill mp-law">📜 RA 12009 — Secs. 7, 8, 11, 13, 14</span>
+      <span class="meta-pill mp-phase">End-User / Implementing Unit</span>
+      <span class="meta-pill mp-phase">8 Required Fields · 6 Special Considerations</span>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO BAR -->
+<div class="intro-bar">
+  <div class="intro-bar-icon">ℹ️</div>
+  <div class="intro-bar-text">
+    This page drills into every field, decision gate, and rule embedded in <strong>Step 3 — Prepare the PPMP</strong> from Phase 1 of the digital procurement flow. Each PPMP field below expands to show the exact sub-steps the end-user must follow, the decision gates they will encounter, and the specific RA 12009 rules that govern each item. <strong>No procurement may be undertaken unless it is in an approved APP, which is built entirely from PPMPs.</strong>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-section-label">Required PPMP Fields</div>
+    <a class="toc-item active" onclick="scrollTo('f1')"><span class="toc-num">A1</span><span class="toc-label">Name of Project / Procurement</span></a>
+    <a class="toc-item" onclick="scrollTo('f2')"><span class="toc-num">A2</span><span class="toc-label">PMO / End-User Unit</span></a>
+    <a class="toc-item" onclick="scrollTo('f3')"><span class="toc-num">A3</span><span class="toc-label">General Description</span></a>
+    <a class="toc-item" onclick="scrollTo('f4')"><span class="toc-num">A4</span><span class="toc-label">Procurement Method</span></a>
+    <a class="toc-item" onclick="scrollTo('f5')"><span class="toc-num">A5</span><span class="toc-label">Bid Evaluation Criteria</span></a>
+    <a class="toc-item" onclick="scrollTo('f6')"><span class="toc-num">A6</span><span class="toc-label">Time Schedule</span></a>
+    <a class="toc-item" onclick="scrollTo('f7')"><span class="toc-num">A7</span><span class="toc-label">Source of Funds</span></a>
+    <a class="toc-item" onclick="scrollTo('f8')"><span class="toc-num">A8</span><span class="toc-label">Approved Budget for the Contract (ABC)</span></a>
+    <div class="toc-section-label">Special Considerations</div>
+    <a class="toc-item" onclick="scrollTo('s1')"><span class="toc-num">B1</span><span class="toc-label">Lifecycle & Environmental Impact</span></a>
+    <a class="toc-item" onclick="scrollTo('s2')"><span class="toc-num">B2</span><span class="toc-label">Green Procurement Criteria</span></a>
+    <a class="toc-item" onclick="scrollTo('s3')"><span class="toc-num">B3</span><span class="toc-label">Subcontracting Arrangements</span></a>
+    <a class="toc-item" onclick="scrollTo('s4')"><span class="toc-num">B4</span><span class="toc-label">Design-and-Build Feasibility</span></a>
+    <a class="toc-item" onclick="scrollTo('s5')"><span class="toc-num">B5</span><span class="toc-label">Goods Must Be Brand New</span></a>
+    <a class="toc-item" onclick="scrollTo('s6')"><span class="toc-num">B6</span><span class="toc-label">No Brand-Name Reference</span></a>
+    <div class="toc-section-label">Decision Gates</div>
+    <a class="toc-item is-decision" onclick="scrollTo('d1')"><span class="toc-num">D1</span><span class="toc-label">Is the procurement in the APP?</span></a>
+    <a class="toc-item is-decision" onclick="scrollTo('d2')"><span class="toc-num">D2</span><span class="toc-label">PPMP vs. Indicative APP</span></a>
+    <a class="toc-item is-decision" onclick="scrollTo('d3')"><span class="toc-num">D3</span><span class="toc-label">HoPE Approval Gate</span></a>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════════════════════════════
+         PART A: REQUIRED PPMP FIELDS
+    ══════════════════════════════════ -->
+    <div class="section-divider">
+      <div class="section-divider-icon" style="background:#fff8ed;">📋</div>
+      <div class="section-divider-text">
+        <h3>Part A — Required PPMP Fields</h3>
+        <p>Eight mandatory fields per RA 12009, Sec. 7 — each with specific rules and sub-steps</p>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- ── A1: NAME ── -->
+    <div class="ppmp-item open" id="f1">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#fff8ed;color:#c47b1a;">A1</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Name of Project / Procurement</div>
+          <div class="item-field-sub">The official title used in all procurement documents, APP, PhilGEPS, and contracts</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">The project or procurement name is the <strong>unique identifier</strong> that links the PPMP to the APP, the invitation to bid, the contract, and the PhilGEPS posting. It must be specific enough that it cannot be confused with any other procurement of the entity.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps to Complete This Field</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">1</div>
+              <div class="substep-text">
+                <strong>Draft a descriptive working title</strong> that identifies the type of procurement (goods/infrastructure/consulting), the subject matter, and the intended location or scope (e.g., "Supply and Delivery of Office Furniture for the Main Building, FY 2025").
+                <div class="substep-sub">Avoid vague titles like "Office Supplies" or "Consultancy Services."</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">2</div>
+              <div class="substep-text">
+                <strong>Check for duplicate names</strong> in the system against all existing PPMPs and prior-year APPs to avoid confusion.
+                <div class="substep-sub">System auto-checks for similar project names and flags potential duplicates before saving.</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">3</div>
+              <div class="substep-text">
+                <strong>Assign a PPMP reference code</strong> following the agency's coding convention (e.g., PPMP-2025-001), which will carry over to all downstream documents.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">4</div>
+              <div class="substep-text">
+                <strong>Confirm alignment with the agency's mandate or program</strong> — the name should reflect the specific program, activity, or project (PAP) it supports under the GAA.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⚖️ Rules & Constraints</div>
+          <div class="rule-box rb-warn">
+            <div class="rule-icon">⚠️</div>
+            <div class="rule-text">The project name used in the PPMP must match <strong>exactly</strong> the name used in the APP, the ITB posted on PhilGEPS, and the resulting contract. Any discrepancy can be a ground for COA audit findings.</div>
+          </div>
+          <div class="rule-box rb-law" style="margin-top:8px;">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 7, RA 12009:</strong> The APP shall at least include the name of the project/procurement. No government procurement shall be undertaken unless consistent with the approved APP.</div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="tag-row">
+            <span class="tag tag-law">Sec. 7 — PPMP / APP</span>
+            <span class="tag tag-doc">PPMP Form Field</span>
+            <span class="tag tag-sys">Auto-validated in system</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── A2: PMO / END-USER ── -->
+    <div class="ppmp-item" id="f2">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#eff6ff;color:#1e3a8a;">A2</div>
+        <div class="item-header-text">
+          <div class="item-field-name">PMO / End-User Unit</div>
+          <div class="item-field-sub">Identifies who is accountable for the procurement and who will receive and use the goods/services</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">This field identifies the <strong>Project Management Office (PMO)</strong> or the specific <strong>end-user unit / implementing unit</strong> that is initiating the procurement. It establishes accountability — this unit is responsible for the technical specifications, the statement of need, and post-delivery acceptance.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">1</div>
+              <div class="substep-text"><strong>Identify the originating unit</strong> — the division, department, or project office that identified the need and prepared the Purchase Request.</div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">2</div>
+              <div class="substep-text"><strong>Designate a unit focal person</strong> who will be the technical counterpart to the BAC and TWG throughout the procurement process. This person must be available for the pre-procurement and pre-bid conferences.</div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">3</div>
+              <div class="substep-text">
+                <strong>Confirm the unit is within the Procuring Entity's organizational structure.</strong> For decentralized agencies, identify whether HoPE functions are delegated.
+                <div class="substep-sub">In decentralized agencies, the head of the decentralized unit is the HoPE for that unit's procurements (Sec. 5(n)).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⚖️ Rules</div>
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 5(j), RA 12009:</strong> The End-User or Implementing Unit is the organic office within the Procuring Entity that <em>identifies, plans, prepares, designs, and implements</em> the procurement project based on its mandate.</div>
+          </div>
+          <div class="rule-box rb-tip" style="margin-top:8px;">
+            <div class="rule-icon">💡</div>
+            <div class="rule-text">The end-user unit is <strong>responsible for preparing all technical specifications</strong> (scope of work, ToR, plans). The BAC only facilitates the process — it does not write specs on behalf of end-users.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 5(j) & 5(n)</span><span class="tag tag-doc">PPMP Form Field</span></div></div>
+      </div>
+    </div>
+
+    <!-- ── A3: GENERAL DESCRIPTION ── -->
+    <div class="ppmp-item" id="f3">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#f5f3ff;color:#5b21b6;">A3</div>
+        <div class="item-header-text">
+          <div class="item-field-name">General Description of the Project / Procurement</div>
+          <div class="item-field-sub">The technical narrative — what is being procured, why, how much, and to what standard</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">The general description provides a concise but <strong>sufficiently detailed narrative</strong> of what is being procured, the quantity, the intended purpose, and the performance or quality standard required. It serves as the basis for the technical specifications in the full bidding documents.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">1</div>
+              <div class="substep-text">
+                <strong>State the object of procurement clearly</strong> — specify whether it is Goods, Infrastructure, or Consulting Services. These are treated differently under RA 12009.
+                <div class="substep-sub">Goods = supplies, materials, equipment, non-personal services; Infrastructure = construction/repair; Consulting = technical/professional services.</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">2</div>
+              <div class="substep-text">
+                <strong>Specify quantity and unit of measure</strong> — e.g., "500 units of office chairs" or "1 lot rehabilitation of 3-storey building." Vague quantities will be flagged in the pre-procurement conference.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">3</div>
+              <div class="substep-text">
+                <strong>Describe performance or functional requirements</strong> — not brand names or models. Refer to relevant PNS, ISO, or other product standards as applicable (Sec. 11).
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">4</div>
+              <div class="substep-text">
+                <strong>State the purpose / justification</strong> — link the procurement to a specific government program, activity, or project (PAP) and explain why it is essential for operations.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">5</div>
+              <div class="substep-text">
+                <strong>Indicate delivery location(s)</strong> — specify where goods are to be delivered or where the infrastructure project is located.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⚖️ Rules</div>
+          <div class="rule-box rb-warn">
+            <div class="rule-icon">⚠️</div>
+            <div class="rule-text"><strong>No brand-name reference is allowed</strong> in the description (Sec. 11). Exception: only for reasons of technical compatibility, interoperability, or preservation of supplier warranty — and the justification must be stated explicitly.</div>
+          </div>
+          <div class="rule-box rb-law" style="margin-top:8px;">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 11, RA 12009:</strong> Specifications shall be based on relevant characteristics, performance or functionality requirements, or product/service standards by appropriate government entities or similar international bodies.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 11 — Specifications</span><span class="tag tag-doc">Technical Specs Draft</span><span class="tag tag-warn">No brand names</span></div></div>
+      </div>
+    </div>
+
+    <!-- ── A4: PROCUREMENT METHOD ── -->
+    <div class="ppmp-item" id="f4">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#fef2f2;color:#b91c1c;">A4</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Procurement Method to be Adopted</div>
+          <div class="item-field-sub">Which of the 11 RA 12009 modes applies — and whether procurement tasks will be outsourced to a procurement agent</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">This field specifies the <strong>mode of procurement</strong> the end-user is recommending, based on the nature and value of the procurement. The BAC makes the final determination, but the end-user's recommendation in the PPMP starts the process. It also indicates whether procurement will be outsourced to a <strong>procurement agent</strong> (Sec. 15).</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">1</div>
+              <div class="substep-text">
+                <strong>Check if the item is a Common-Use Supply (CSE)</strong> available in the PS-DBM catalogue (PhilGEPS electronic catalogue).
+                <div class="substep-sub">If YES → procurement must go through PS-DBM. No bidding required. Skip to Direct Purchase from PS-DBM. (Sec. 40)</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">2</div>
+              <div class="substep-text">
+                <strong>Apply the GPPB Decision Tree (Sec. 6)</strong> — the system provides a built-in decision tree to guide the user through the correct mode based on: (a) type of procurement, (b) ABC value, (c) urgency, (d) number of available suppliers, (e) specialty/complexity.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">3</div>
+              <div class="substep-text">
+                <strong>Select the recommended mode</strong> from the 11 available under RA 12009 and document the justification. Competitive Bidding is the default; all alternative modes require specific legal grounds.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">4</div>
+              <div class="substep-text">
+                <strong>Indicate if procurement tasks will be outsourced</strong> to a Procurement Agent under Sec. 15 (i.e., the procuring entity lacks the capability). If YES, identify the government agency expert that will act as agent.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — Mode Selection</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · A4</div>
+                <div class="dg-question">Is the ABC at or below ₱2,000,000 and goods are not in PS-DBM?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES</div>
+                <div class="dpb-label">Small Value Procurement</div>
+                <ul class="dpb-actions">
+                  <li>Request at least 3 price quotations</li>
+                  <li>1 responsive quotation is sufficient to proceed</li>
+                  <li>No formal bidding required</li>
+                  <li>Threshold subject to periodic GPPB review</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO (ABC exceeds ₱2M)</div>
+                <div class="dpb-label">Competitive Bidding (default)</div>
+                <ul class="dpb-actions">
+                  <li>Proceed with full competitive bidding process</li>
+                  <li>Unless a specific exception under Secs. 28–37 applies</li>
+                  <li>Document the justification for any alternative mode</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="decision-gate" style="margin-top:10px;">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · A4-B</div>
+                <div class="dg-question">Is the procurement proprietary, exclusive, or sole-source in nature?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES</div>
+                <div class="dpb-label">Direct Contracting (Sec. 31)</div>
+                <ul class="dpb-actions">
+                  <li>Document that goods are proprietary / patented / copyrighted, or sole exclusive dealer with no substitute</li>
+                  <li>BAC must validate this claim</li>
+                  <li>Subject to post-qualification process</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO</div>
+                <div class="dpb-label">Cannot use Direct Contracting</div>
+                <ul class="dpb-actions">
+                  <li>Proceed with competitive bidding or applicable alternative mode</li>
+                  <li>Claiming sole-source without legal basis = administrative liability (Sec. 92)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 26, RA 12009:</strong> The Procuring Entity shall adopt any of the 11 modes consistent with the fit-for-purpose procurement approach. Specific terms and conditions for each mode are in the IRR.</div>
+          </div>
+          <div class="rule-box rb-warn" style="margin-top:8px;">
+            <div class="rule-icon">⚠️</div>
+            <div class="rule-text"><strong>Prohibition on Contract Splitting (Sec. 39):</strong> The procurement method must not be chosen to artificially split a procurement that should be bid as one contract into smaller amounts to circumvent competitive bidding thresholds. This is an administrative offense.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 26 — 11 Modes</span><span class="tag tag-law">Sec. 39 — Anti-Splitting</span><span class="tag tag-law">Sec. 40 — CSE / PS-DBM</span><span class="tag tag-law">Sec. 15 — Procurement Agent</span><span class="tag tag-sys">GPPB Decision Tree (System)</span></div></div>
+      </div>
+    </div>
+
+    <!-- ── A5: BID EVALUATION CRITERIA ── -->
+    <div class="ppmp-item" id="f5">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#f0fdf4;color:#166534;">A5</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Criteria for Bid Evaluation</div>
+          <div class="item-field-sub">LCRB (lowest price) vs. MEARB (quality-price balance) — a key strategic decision new to RA 12009</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">This is one of the most significant new elements introduced by RA 12009. The end-user must recommend <strong>which award criterion</strong> should apply: the <strong>Lowest Calculated Responsive Bid (LCRB)</strong> — which awards purely on price — or the <strong>Most Economically Advantageous Responsive Bid (MEARB)</strong> — which weighs quality factors alongside price. This choice shapes the entire evaluation process.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">1</div>
+              <div class="substep-text">
+                <strong>Assess whether price alone is sufficient</strong> to identify the best value. For routine, commodity-type goods, LCRB is appropriate. For complex, innovative, or quality-sensitive procurements, MEARB may be better.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">2</div>
+              <div class="substep-text">
+                <strong>If recommending MEARB:</strong> draft the quality criteria and their relative weights. Under Sec. 61, price must be given a minimum weight of <strong>15%</strong> and a maximum of <strong>40%</strong>, meaning quality criteria collectively carry at least 60% of the total score.
+                <div class="substep-sub">Quality criteria may include: technical merit, aesthetics, functionality, approach & methodology, accessibility, tools & equipment, social/environmental/innovative characteristics, staff qualifications, delivery conditions, disposal measures.</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">3</div>
+              <div class="substep-text">
+                <strong>Document the justification</strong> for the chosen criterion. The pre-procurement conference will validate this choice. The BAC, based on the end-user's recommendation, finalizes the criterion.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">4</div>
+              <div class="substep-text">
+                <strong>For Consulting Services:</strong> the criterion is always the <strong>Highest Rated Bid (HRB)</strong> using a quality-based evaluation — not pure LCRB. The financial proposal is negotiated with the top-ranked bidder.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — LCRB vs. MEARB</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · A5</div>
+                <div class="dg-question">Is this procurement primarily quality-sensitive, complex, or innovative?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — Use MEARB</div>
+                <div class="dpb-label">Best value = quality + price</div>
+                <ul class="dpb-actions">
+                  <li>Define quality criteria in the PPMP/bidding docs</li>
+                  <li>Set quality weight: 60–85% of total score</li>
+                  <li>Set price weight: 15–40% of total score</li>
+                  <li>GPPB may also authorize MARB (Most Advantageous Responsive Bid)</li>
+                  <li>Must be disclosed in the ITB</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO — Use LCRB</div>
+                <div class="dpb-label">Best value = lowest compliant price</div>
+                <ul class="dpb-actions">
+                  <li>Standard for most goods and infrastructure</li>
+                  <li>Bids ranked lowest to highest calculated price</li>
+                  <li>No quality score computed</li>
+                  <li>ABC is the absolute ceiling — no minimum floor</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 49 & 61, RA 12009:</strong> At the pre-procurement conference, the BAC shall finally determine whether the contract will be awarded to the LCRB or MEARB, based on the recommendation of the end-user unit.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 49 — Pre-Procurement Conf.</span><span class="tag tag-law">Sec. 61 — MEARB (price wt: 15–40%)</span><span class="tag tag-law">Sec. 62 — Consulting: HRB</span></div></div>
+      </div>
+    </div>
+
+    <!-- ── A6: TIME SCHEDULE ── -->
+    <div class="ppmp-item" id="f6">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#f0fdfa;color:#134e4a;">A6</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Time Schedule</div>
+          <div class="item-field-sub">The procurement timeline from PPMP preparation through delivery and acceptance</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">The time schedule maps out <strong>all key milestones</strong> in the procurement — from PPMP submission to contract implementation to delivery. It must be realistic, account for all mandatory waiting periods under RA 12009, and align with the fiscal year budget cycle.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdfa;color:#134e4a;">1</div>
+              <div class="substep-text">
+                <strong>Identify the "need date"</strong> — the latest date by which the goods/services must be available to the end-user to avoid disruption to government operations.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdfa;color:#134e4a;">2</div>
+              <div class="substep-text">
+                <strong>Back-calculate the procurement schedule</strong> from the need date, building in all mandatory periods:
+                <div class="substep-sub">ITB publication: 7 calendar days · Pre-bid conference: ≥12 days before bid deadline · Bid evaluation: 7 calendar days · Post-qualification: 12 calendar days · Bid opening to award: ≤60 calendar days · Contract signing: 10 calendar days from NOA · NTP to delivery: per contract terms.</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdfa;color:#134e4a;">3</div>
+              <div class="substep-text">
+                <strong>Consider early procurement activities (Sec. 12)</strong> — if the procurement is for the following fiscal year, the end-user may initiate the PPMP while the budget is still being deliberated, using an Indicative APP. No contract award until funds are approved.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdfa;color:#134e4a;">4</div>
+              <div class="substep-text">
+                <strong>For multi-year projects (Sec. 9):</strong> schedule must align with the Multi-Year Contractual Authority (MYCA) from DBM. The MYCA must be secured before procurement activities begin.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdfa;color:#134e4a;">5</div>
+              <div class="substep-text">
+                <strong>Build in contingency time</strong> for failed bidding (re-bid adds at least another full bidding cycle), protests (Sec. 83–86), and post-qualification failures.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — Schedule Feasibility</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · A6</div>
+                <div class="dg-question">Can the need date be met given all mandatory RA 12009 timelines?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES</div>
+                <div class="dpb-label">Proceed with standard schedule</div>
+                <ul class="dpb-actions">
+                  <li>Document milestones in PPMP</li>
+                  <li>System auto-computes and validates schedule</li>
+                  <li>Include buffer for failed bidding scenarios</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO — Insufficient lead time</div>
+                <div class="dpb-label">Consider alternatives</div>
+                <ul class="dpb-actions">
+                  <li>Invoke Early Procurement Activities (Sec. 12)</li>
+                  <li>Assess if emergency/negotiated procurement grounds apply (Sec. 35(b))</li>
+                  <li>Adjust need date — coordinate with end-user</li>
+                  <li>Document justification thoroughly</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 67, RA 12009:</strong> The period from opening of bids to award of contract shall not exceed <strong>sixty (60) calendar days</strong>. GPPB may authorize up to 90 days. This is a hard deadline built into the system schedule calculator.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 12 — Early Procurement</span><span class="tag tag-law">Sec. 67 — 60-day period</span><span class="tag tag-law">Sec. 9 — Multi-Year / MYCA</span><span class="tag tag-sys">Auto-schedule calculator</span></div></div>
+      </div>
+    </div>
+
+    <!-- ── A7: SOURCE OF FUNDS ── -->
+    <div class="ppmp-item" id="f7">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#fff8ed;color:#c47b1a;">A7</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Source of Funds</div>
+          <div class="item-field-sub">The legal basis and account classification for the budget that will finance this procurement</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">This field identifies <strong>where the money is coming from</strong> — whether it is the General Appropriations Act (GAA), a Special Purpose Fund, foreign-assisted (ODA/loan), internally generated revenue, corporate budget, or a local appropriations ordinance. The source of funds determines which rules apply and who approves the budget.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">1</div>
+              <div class="substep-text">
+                <strong>Identify the fund source category:</strong>
+                <div class="substep-sub">· NGA: General Appropriations Act (GAA) — specific Program, Activity, Project (PAP) and object code · GOCC/GFI: Corporate Operating Budget (approved by governing Board per E.O. 518) · SUC: RA 8292 (Higher Education Modernization Act) funds or internally generated income · LGU: Appropriations Ordinance of the Sanggunian · Foreign-assisted: ODA loan or grant agreement (treaty provisions may supplement RA 12009 rules)</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">2</div>
+              <div class="substep-text">
+                <strong>Indicate the specific PAP / budget line item</strong> from the current year's appropriations and the allotment class (MOOE, CO, PS).
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">3</div>
+              <div class="substep-text">
+                <strong>For foreign-assisted projects:</strong> confirm whether the treaty / loan agreement imposes procurement rules that differ from RA 12009. Under Sec. 4, treaty provisions prevail.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — Foreign-Assisted Procurement</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · A7</div>
+                <div class="dg-question">Is this funded by an ODA loan / grant with a treaty or international agreement?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — Treaty-Funded</div>
+                <div class="dpb-label">Treaty rules apply (Sec. 4)</div>
+                <ul class="dpb-actions">
+                  <li>Procurement must follow the treaty / loan agreement rules</li>
+                  <li>RA 12009 applies only to the extent not inconsistent with the treaty</li>
+                  <li>Note this in the PPMP and all bidding documents</li>
+                  <li>GPPB must be informed</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO — Locally Funded</div>
+                <div class="dpb-label">RA 12009 applies fully</div>
+                <ul class="dpb-actions">
+                  <li>All provisions of RA 12009 and its IRR govern</li>
+                  <li>Budget must be within approved GAA / appropriation</li>
+                  <li>Subcontracting rules under Sec. 7 apply</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 4, RA 12009:</strong> This Act shall apply regardless of source of funds, whether local or foreign. Any treaty or international agreement affecting the subject matter to which the Philippine government is a signatory shall be observed.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 4 — Scope & Application</span><span class="tag tag-law">Sec. 5(a) — ABC definition</span><span class="tag tag-doc">GAA / Appropriations Ordinance / Corporate Budget</span></div></div>
+      </div>
+    </div>
+
+    <!-- ── A8: ABC ── -->
+    <div class="ppmp-item" id="f8">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#eff6ff;color:#1e3a8a;">A8</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Approved Budget for the Contract (ABC)</div>
+          <div class="item-field-sub">The ceiling for bid prices — the most financially critical field in the PPMP</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is</div>
+          <p class="prose">The ABC is the <strong>absolute upper limit</strong> on what the government will pay for the contract. It serves as the ceiling for bid prices — any bid that exceeds the ABC is automatically disqualified. It must be grounded in market research (Sec. 10) and lifecycle cost analysis (Sec. 13), and must be formally approved by the HoPE.</p>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">🔢 Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">1</div>
+              <div class="substep-text">
+                <strong>Base the ABC on the Market Scoping Report (Sec. 10)</strong> — price quotations, PS-DBM reference prices, PhilGEPS historical data, industry publications, or direct supplier consultations. The ABC must reflect the <strong>most advantageous prevailing market price</strong>.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">2</div>
+              <div class="substep-text">
+                <strong>Apply Lifecycle Cost Analysis (LCCA, Sec. 13)</strong> when relevant — especially for equipment or infrastructure. The ABC should factor in not just acquisition cost but operating, maintenance, and disposal costs over the asset's useful life.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">3</div>
+              <div class="substep-text">
+                <strong>For multi-year contracts (Sec. 9):</strong> the total project cost reflected in the MYCA or its equivalent document shall be the basis for the ABC. The annual slice of the ABC must be within the annual appropriation.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">4</div>
+              <div class="substep-text">
+                <strong>Submit the ABC for HoPE approval</strong> as part of the PPMP. The HoPE approval of the APP (which incorporates the PPMP) constitutes approval of the ABC for each procurement item.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#eff6ff;color:#1e3a8a;">5</div>
+              <div class="substep-text">
+                <strong>The ABC is publicly disclosed</strong> in the ITB and PhilGEPS posting. It cannot be changed once the ITB is published without going through a formal APP amendment.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — ABC Validation</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · A8</div>
+                <div class="dg-question">Is the ABC supported by documented market research and within the available budget?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES</div>
+                <div class="dpb-label">ABC is valid</div>
+                <ul class="dpb-actions">
+                  <li>Attach market scoping report as supporting document</li>
+                  <li>ABC approved as part of APP by HoPE</li>
+                  <li>Budget Office issues CFA for this amount</li>
+                  <li>Any bid above ABC is automatically disqualified (Sec. 60)</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO</div>
+                <div class="dpb-label">ABC must be revised</div>
+                <ul class="dpb-actions">
+                  <li>Re-conduct market scoping / price canvas</li>
+                  <li>If ABC exceeds budget: reduce scope or request budget augmentation</li>
+                  <li>If ABC is too low (all bids exceed ABC): revise ABC through APP amendment, re-bid</li>
+                  <li>Padding or inflating the ABC = potential Sec. 92 violation</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 5(a) & Sec. 60, RA 12009:</strong> ABC is the budget for the contract duly approved by the HoPE. Bid prices that exceed the ABC shall be disqualified outright. There is no lower limit to the award amount.</div>
+          </div>
+          <div class="rule-box rb-warn" style="margin-top:8px;">
+            <div class="rule-icon">⚠️</div>
+            <div class="rule-text"><strong>Single Bid Rule (Sec. 65):</strong> Even with only one bidder, the Procuring Entity must ensure the ABC reflects the most advantageous prevailing price. A sole bidder with an inflated ABC should trigger a review.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 5(a) — ABC Definition</span><span class="tag tag-law">Sec. 60 — ABC as Ceiling</span><span class="tag tag-law">Sec. 10 — Market Scoping</span><span class="tag tag-law">Sec. 13 — LCCA</span><span class="tag tag-warn">No bid above ABC</span></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         PART B: SPECIAL CONSIDERATIONS
+    ══════════════════════════════════ -->
+    <div class="section-divider" id="s1">
+      <div class="section-divider-icon" style="background:#f0fdf4;">🌿</div>
+      <div class="section-divider-text">
+        <h3>Part B — Special Considerations</h3>
+        <p>Six additional RA 12009-specific checks every PPMP must address</p>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- B1: LIFECYCLE -->
+    <div class="ppmp-item" id="s1">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#f0fdf4;color:#166534;">B1</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Lifecycle & Environmental Impact Assessment</div>
+          <div class="item-field-sub">New mandatory consideration under RA 12009 — all PPMPs must account for total lifecycle cost and environmental footprint</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is & Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">1</div>
+              <div class="substep-text">
+                <strong>Conduct Lifecycle Assessment (LCA):</strong> Estimate the environmental impacts of the goods/infrastructure across its entire life — raw material extraction, manufacturing, transport, use phase, and end-of-life disposal. Required for all procurements under Sec. 13.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">2</div>
+              <div class="substep-text">
+                <strong>Conduct Lifecycle Cost Analysis (LCCA):</strong> Calculate the <em>total cost of ownership</em> — acquisition price + installation + operation + maintenance + disposal. For equipment, a cheaper unit with high running costs may cost more over its lifetime than a pricier but efficient one.
+                <div class="substep-sub">Lifecycle Cost = Acquisition + Operating + Maintenance + Disposal (Sec. 5(r))</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">3</div>
+              <div class="substep-text">
+                <strong>Include disposal plan in the PPMP (Sec. 7):</strong> consider rehabilitation, donation, trade-in, auction, recycling, or direct negotiation for the asset at the end of its useful life. Disposal method affects the net lifecycle cost.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">4</div>
+              <div class="substep-text">
+                <strong>Ensure minimal negative environmental impact</strong> during the procurement lifecycle. Goods procured should be consistent with responsible consumption and production practices and national policy (Sec. 7).
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-law">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 13, RA 12009:</strong> Procuring Entities shall apply LCA and LCCA in project planning, eligibility and selection criteria, or contract implementation. <em>Provided</em>, That the GPPB shall issue appropriate guidelines on the application of LCCA.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 13 — LCA / LCCA</span><span class="tag tag-law">Sec. 5(r) — Lifecycle Cost definition</span><span class="tag tag-law">Sec. 7 — Disposal planning</span></div></div>
+      </div>
+    </div>
+
+    <!-- B2: GREEN PROCUREMENT -->
+    <div class="ppmp-item" id="s2">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#f0fdf4;color:#166534;">B2</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Green Procurement Criteria</div>
+          <div class="item-field-sub">Mandated by RA 12009 Article XII — environmental criteria must be integrated into specifications and bid evaluation</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is & Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">1</div>
+              <div class="substep-text">
+                <strong>Identify applicable green criteria</strong> for the specific type of goods/infrastructure. Examples: energy efficiency ratings, recyclable materials, low VOC content, ISO 14001 certification, carbon footprint labeling, water efficiency ratings.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">2</div>
+              <div class="substep-text">
+                <strong>Integrate green criteria into the technical specifications</strong> (Field A3) as minimum requirements or as scored criteria (if using MEARB). Green specifications shall be given <strong>greater weight</strong> in bid evaluation (Sec. 73).
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">3</div>
+              <div class="substep-text">
+                <strong>Check if DTI-certified green products exist</strong> in the market for this procurement. DTI is mandated under Sec. 74 to develop a green product validation and certification program.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f0fdf4;color:#166534;">4</div>
+              <div class="substep-text">
+                <strong>Note the green strategy being employed</strong> in the PPMP — e.g., specifying energy-efficient equipment, requiring use of recycled materials in construction, mandating low-emission transport, requiring ISO 14001-certified suppliers.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-ok">
+            <div class="rule-icon">🌿</div>
+            <div class="rule-text"><strong>Sec. 72 & 73, RA 12009:</strong> All Procuring Entities shall establish a sustainable public procurement program. Green Public Procurement seeks goods and services with reduced environmental impact. Sustainability of products, materials, or structures with green specifications shall be given <strong>greater weight in bid evaluation.</strong></div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Secs. 72–74 — Sustainable Public Procurement</span><span class="tag tag-law">Sec. 3(g) — Sustainability principle</span></div></div>
+      </div>
+    </div>
+
+    <!-- B3: SUBCONTRACTING -->
+    <div class="ppmp-item" id="s3">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#fef2f2;color:#b91c1c;">B3</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Subcontracting Arrangements</div>
+          <div class="item-field-sub">If subcontracting is anticipated, RA 12009 imposes strict prior-approval and disclosure requirements</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is & Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">1</div>
+              <div class="substep-text">
+                <strong>Assess whether subcontracting will be necessary</strong> for the project (typically relevant for infrastructure and consulting services). Indicate this in the PPMP if anticipated.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">2</div>
+              <div class="substep-text">
+                <strong>Note the HoPE prior-approval requirement (Sec. 7):</strong> subcontracting requires the HoPE's explicit prior approval. The bidder must disclose subcontractors during the bidding process.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">3</div>
+              <div class="substep-text">
+                <strong>Clarify that the general contractor remains fully liable</strong> for subcontractor actions, defaults, delays, and negligence. The subcontractor is not a party to the government contract.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">4</div>
+              <div class="substep-text">
+                <strong>Include CPES applicability note (Sec. 7):</strong> the Constructors Performance Evaluation System (CPES) applies to the work of subcontractors as well, and subcontractors get credit for 100% of the subcontracted portion.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-warn">
+            <div class="rule-icon">⚠️</div>
+            <div class="rule-text"><strong>Sec. 7, RA 12009:</strong> For locally-funded projects: (a) HoPE must give prior approval; (b) subcontractors must meet eligibility criteria; (c) bidder must disclose subcontractors during bidding; (d) general contractor remains liable for subcontractor's acts. The contractor and subcontractor share liability for safety and labor standard violations.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 7 — Subcontracting Rules</span><span class="tag tag-warn">HoPE prior approval required</span></div></div>
+      </div>
+    </div>
+
+    <!-- B4: DESIGN-AND-BUILD -->
+    <div class="ppmp-item" id="s4">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#f5f3ff;color:#5b21b6;">B4</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Design-and-Build Feasibility Assessment</div>
+          <div class="item-field-sub">For infrastructure projects — a new codified option under Sec. 14 that allows a single contractor for both design and construction</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 What It Is & Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">1</div>
+              <div class="substep-text">
+                <strong>Determine if the project is suitable for Design-and-Build (D&B, Sec. 14):</strong> D&B assigns both the design and construction to a single contractor, allowing quality assurance and effective cost/schedule management. It is best suited for projects where functional requirements are clear but detailed designs are not yet finalized.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">2</div>
+              <div class="substep-text">
+                <strong>If D&B is chosen:</strong> the detailed engineering requirement under Sec. 8 is waived — bidding may proceed without completed engineering designs. The contractor is responsible for both design and construction under a single contract.
+                <div class="substep-sub">Note: Standard infrastructure (Sec. 8) requires completed detailed engineering, surveys, and designs before bidding — D&B is the specific exception.</div>
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#f5f3ff;color:#5b21b6;">3</div>
+              <div class="substep-text">
+                <strong>Consider architectural integrity:</strong> Sec. 8 also allows procuring entities to consider well-curated and aesthetic architectural design to ensure the infrastructure not only meets functional requirements but also contributes to its overall appeal and architectural integrity.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — Infrastructure Design Approach</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · B4 (Infrastructure only)</div>
+                <div class="dg-question">Has detailed engineering (surveys, designs, right-of-way) been completed?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — Standard Bidding</div>
+                <div class="dpb-label">Proceed with standard competitive bidding</div>
+                <ul class="dpb-actions">
+                  <li>Detailed engineering must be approved per HoPE standards</li>
+                  <li>Right-of-way acquisition completed (RA 10752)</li>
+                  <li>Environmental impact considered in design</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-maybe">⚡ NO — Consider D&B</div>
+                <div class="dpb-label">Design-and-Build scheme (Sec. 14)</div>
+                <ul class="dpb-actions">
+                  <li>Use D&B as procurement approach</li>
+                  <li>Detailed engineering exception applies</li>
+                  <li>Single contractor for design + build</li>
+                  <li>Must be reflected in PPMP and bidding docs</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 14 — Design-and-Build</span><span class="tag tag-law">Sec. 8 — Detailed Engineering requirement</span></div></div>
+      </div>
+    </div>
+
+    <!-- B5: BRAND NEW -->
+    <div class="ppmp-item" id="s5">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#fff8ed;color:#c47b1a;">B5</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Goods Must Be Brand New (Rule & Exceptions)</div>
+          <div class="item-field-sub">Default rule under Sec. 7 — with narrow, documented exceptions for specific sectors</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 The Rule & Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">1</div>
+              <div class="substep-text">
+                <strong>Default rule: all goods procured must be brand new</strong> (Sec. 7). This must be stated in the technical specifications. "Brand new" means the goods have never been used, are not refurbished, and are not reconditioned.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">2</div>
+              <div class="substep-text">
+                <strong>Assess if the exception applies:</strong> procurement of second-hand, refurbished, or reconditioned goods may be considered for: (a) military, defense, or law enforcement equipment or materiel — where it is most advantageous to the government, subject to DBM guidelines.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fff8ed;color:#c47b1a;">3</div>
+              <div class="substep-text">
+                <strong>If invoking the exception:</strong> the PPMP must document the justification; DBM guidelines must be followed; and the criteria of durability, remaining useful life, sustainability, maintenance cost, and warranty must all be evaluated.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">⬡ Decision Gate — Brand New or Exception?</div>
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate · B5</div>
+                <div class="dg-question">Is the procurement for military, defense, or law enforcement equipment?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — Exception may apply</div>
+                <div class="dpb-label">Second-hand / refurbished allowed</div>
+                <ul class="dpb-actions">
+                  <li>Subject to DBM guidelines</li>
+                  <li>Must be most advantageous to the government</li>
+                  <li>Evaluate: durability, remaining useful life, sustainability, maintenance cost, warranty</li>
+                  <li>Document full justification in PPMP</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NO — Brand New only</div>
+                <div class="dpb-label">Must be new, unused goods</div>
+                <ul class="dpb-actions">
+                  <li>State "brand new" as a minimum requirement in specs</li>
+                  <li>Supplier certifies goods are brand new in the bid</li>
+                  <li>Acceptance officer checks on delivery</li>
+                  <li>Accepting used goods as new = ground for blacklisting (Sec. 100)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 7 — Brand New rule & exceptions</span><span class="tag tag-warn">Accepting non-new goods = Sec. 100 offense</span></div></div>
+      </div>
+    </div>
+
+    <!-- B6: NO BRAND NAME -->
+    <div class="ppmp-item" id="s6">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)">
+        <div class="item-num-badge" style="background:#fef2f2;color:#b91c1c;">B6</div>
+        <div class="item-header-text">
+          <div class="item-field-name">No Brand-Name Reference in Specifications</div>
+          <div class="item-field-sub">A strict rule under Sec. 11 with narrow, documented exceptions — violations restrict competition and are a common COA finding</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="body-section-title">📝 The Rule & Sub-Steps</div>
+          <div class="substep-list">
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">1</div>
+              <div class="substep-text">
+                <strong>Draft all specifications in terms of function, performance, or standards</strong> — never by brand name, trade name, model number, or catalogue number. Wrong: "HP LaserJet Pro." Correct: "Laser printer, minimum 30 ppm, duplex printing, network-ready, compatible with [specific network standard]."
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">2</div>
+              <div class="substep-text">
+                <strong>Review specs against GPPB checklist</strong> — system flags any brand name, model number, or proprietary reference in the specifications field before allowing the PPMP to be submitted.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">3</div>
+              <div class="substep-text">
+                <strong>If brand-name reference is technically unavoidable:</strong> the limited exceptions under Sec. 11 are: (a) technical compatibility, (b) interoperability with existing systems, (c) servicing requirements, (d) maintenance, or (e) preservation of supplier warranty to keep the performance, functionality, and useful life of the equipment.
+              </div>
+            </div>
+            <div class="substep">
+              <div class="substep-icon" style="background:#fef2f2;color:#b91c1c;">4</div>
+              <div class="substep-text">
+                <strong>If invoking the exception:</strong> clearly state in the PPMP and bidding documents the reason or justification for specifying the brand/model. The ITB must disclose this. The default phrase is "or its equivalent."
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-warn">
+            <div class="rule-icon">⚠️</div>
+            <div class="rule-text">Writing specifications that are tailor-made for a specific brand or supplier — even without explicitly naming it — constitutes a violation of the competitiveness principle (Sec. 3(b)) and is a ground for administrative liability under Sec. 92(g) (acts with the intention of not complying with mandatory provisions).</div>
+          </div>
+          <div class="rule-box rb-law" style="margin-top:8px;">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 11, RA 12009:</strong> Specifications for the procurement of goods shall be based on relevant characteristics, performance or functionality requirements, or product/service standards. Reference to a brand name shall not be allowed <em>except</em> for reasons of technical compatibility, interoperability, servicing, maintenance, or preservation of supplier warranty.</div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="rule-box rb-system">
+            <div class="rule-icon">🖥️</div>
+            <div class="rule-text"><strong>System Validation:</strong> The digital procurement system scans the general description and specifications fields for known brand names, model numbers, and common trade names before allowing PPMP submission, flagging any hits for end-user review.</div>
+          </div>
+        </div>
+        <div class="body-section"><div class="tag-row"><span class="tag tag-law">Sec. 11 — Specifications (no brand names)</span><span class="tag tag-warn">COA audit risk</span><span class="tag tag-sys">Auto brand-name scanner</span></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         PART D: GATEWAY DECISIONS
+    ══════════════════════════════════ -->
+    <div class="section-divider">
+      <div class="section-divider-icon" style="background:#fef2f2;">⬡</div>
+      <div class="section-divider-text">
+        <h3>Part D — PPMP-Level Decision Gates</h3>
+        <p>Three critical approval checkpoints before the PPMP is incorporated into the APP</p>
+      </div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- D1 -->
+    <div class="ppmp-item" id="d1">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)" style="border-left: 3px solid var(--red);">
+        <div class="item-num-badge" style="background:#fef2f2;color:#b91c1c;">D1</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Is the procurement in the APP?</div>
+          <div class="item-field-sub">The most fundamental gate — no procurement may proceed unless it is in the approved APP (Sec. 7)</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate D1 — Fundamental</div>
+                <div class="dg-question">Is this PPMP item included in the HoPE-approved APP or Indicative APP?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — In approved APP</div>
+                <div class="dpb-label">Procurement may proceed</div>
+                <ul class="dpb-actions">
+                  <li>Proceed to budget verification (Phase 2)</li>
+                  <li>BAC may initiate pre-procurement</li>
+                  <li>System generates procurement reference number</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NOT in APP</div>
+                <div class="dpb-label">Procurement is BLOCKED</div>
+                <ul class="dpb-actions">
+                  <li>End-user must prepare PPMP and submit for APP inclusion</li>
+                  <li>APP must be amended — requires HoPE approval</li>
+                  <li>APP amended only per IRR guidelines</li>
+                  <li>No emergency exception except Sec. 35(b) grounds (imminent danger to life/property)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="rule-box rb-law" style="margin-top:12px;">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 7, RA 12009:</strong> "No government procurement shall be undertaken unless it is in accordance with the approved APP or Indicative APP of the Procuring Entity."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D2 -->
+    <div class="ppmp-item" id="d2">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)" style="border-left: 3px solid var(--red);">
+        <div class="item-num-badge" style="background:#fef2f2;color:#b91c1c;">D2</div>
+        <div class="item-header-text">
+          <div class="item-field-name">Approved APP vs. Indicative APP — What Applies?</div>
+          <div class="item-field-sub">Early procurement activities depend on the Indicative APP — but contract award is blocked until actual funds are approved</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate D2 — Timing</div>
+                <div class="dg-question">Has the appropriation / budget for this procurement been approved?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — Funds approved</div>
+                <div class="dpb-label">Full procurement cycle allowed</div>
+                <ul class="dpb-actions">
+                  <li>Use Approved APP (not Indicative)</li>
+                  <li>All phases including contract award may proceed</li>
+                  <li>CFA must be issued before contract signing</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-maybe">⚡ NOT YET — Budget pending</div>
+                <div class="dpb-label">Early Procurement only (Sec. 12)</div>
+                <ul class="dpb-actions">
+                  <li>Indicative APP approved by HoPE</li>
+                  <li>May advertise, accept bids, evaluate, post-qualify</li>
+                  <li><strong>NO contract award until funds are approved</strong></li>
+                  <li>For right-of-way projects: no award until permit/deed obtained</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D3 -->
+    <div class="ppmp-item" id="d3">
+      <div class="ppmp-item-header" onclick="toggleItem(this.parentElement)" style="border-left: 3px solid var(--red);">
+        <div class="item-num-badge" style="background:#fef2f2;color:#b91c1c;">D3</div>
+        <div class="item-header-text">
+          <div class="item-field-name">HoPE Approval Gate for the PPMP / APP</div>
+          <div class="item-field-sub">The PPMP has no legal standing until incorporated into the APP and approved by the Head of the Procuring Entity (HoPE)</div>
+        </div>
+        <div class="item-toggle">▾</div>
+      </div>
+      <div class="ppmp-item-body">
+        <div class="body-section">
+          <div class="decision-gate">
+            <div class="decision-gate-header">
+              <div class="dg-icon">⬡</div>
+              <div>
+                <div class="dg-label">Decision Gate D3 — Final PPMP Approval</div>
+                <div class="dg-question">Has the HoPE reviewed and approved the APP incorporating this PPMP?</div>
+              </div>
+            </div>
+            <div class="decision-paths-grid">
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-yes">✓ YES — APP Approved</div>
+                <div class="dpb-label">PPMP is legally effective</div>
+                <ul class="dpb-actions">
+                  <li>APP posted on PhilGEPS (mandatory)</li>
+                  <li>Procurement may formally begin</li>
+                  <li>BAC initiates pre-procurement conference</li>
+                  <li>Budget Office processes CFA</li>
+                </ul>
+              </div>
+              <div class="decision-path-block">
+                <div class="dpb-outcome outcome-no">✗ NOT YET approved</div>
+                <div class="dpb-label">PPMP is a draft only</div>
+                <ul class="dpb-actions">
+                  <li>Cannot initiate any formal procurement activity</li>
+                  <li>Address HoPE's review comments</li>
+                  <li>Revise PPMP if ABC, specs, or mode is questioned</li>
+                  <li>Resubmit for HoPE approval</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="two-col" style="margin-top:12px;">
+            <div class="info-box">
+              <h5>Who is HoPE?</h5>
+              <ul>
+                <li><strong>NGAs:</strong> Head of the agency or duly authorized official</li>
+                <li><strong>GOCCs / GFIs / SUCs:</strong> Governing Board or duly authorized official</li>
+                <li><strong>LGUs:</strong> Local chief executive (Mayor, Governor)</li>
+                <li><strong>Decentralized units:</strong> Head of the decentralized unit (subject to delegation limits)</li>
+              </ul>
+            </div>
+            <div class="info-box">
+              <h5>What HoPE Reviews in the PPMP</h5>
+              <ul>
+                <li>Is the procurement necessary and within mandate?</li>
+                <li>Is the ABC realistic and grounded in market data?</li>
+                <li>Is the procurement mode appropriate?</li>
+                <li>Is the timeline feasible within the fiscal year?</li>
+                <li>Are green and sustainability criteria applied?</li>
+                <li>Is the procurement within the approved budget?</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rule-box rb-law" style="margin-top:12px;">
+            <div class="rule-icon">📜</div>
+            <div class="rule-text"><strong>Sec. 7, RA 12009:</strong> The APP shall be approved by the HoPE and must be consistent with its duly approved yearly budget or proposed budget in the case of the Indicative APP. The APP shall be formulated and revised only in accordance with the guidelines set forth in the IRR.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+function toggleItem(el) {
+  el.classList.toggle('open');
+}
+
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Highlight briefly
+    el.classList.add('highlighted');
+    setTimeout(() => el.classList.remove('highlighted'), 1800);
+    // Open the item
+    if (!el.classList.contains('open')) el.classList.add('open');
+    // Update active TOC
+    document.querySelectorAll('.toc-item').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+}
+</script>
+</body>
+</html>

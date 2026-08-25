@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RA 12009 — Digital Procurement Process Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg2: #111827;
+    --bg3: #1a2236;
+    --border: rgba(255,255,255,0.07);
+    --gold: #f0b429;
+    --gold2: #fcd34d;
+    --blue: #3b82f6;
+    --teal: #14b8a6;
+    --rose: #f43f5e;
+    --violet: #8b5cf6;
+    --emerald: #10b981;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --pill: #1e2d45;
+
+    /* Department colors */
+    --d-user: #3b82f6;
+    --d-budget: #f0b429;
+    --d-proc: #f43f5e;
+    --d-supplier: #10b981;
+    --d-accounting: #8b5cf6;
+    --d-supplies: #f97316;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0b1628 0%, #111827 50%, #0d1f3c 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 36px 48px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(240,180,41,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-tag {
+    display: inline-block;
+    background: rgba(240,180,41,0.12);
+    border: 1px solid rgba(240,180,41,0.3);
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    max-width: 700px;
+  }
+  header h1 span { color: var(--gold); }
+  header p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 580px;
+    line-height: 1.6;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 18px 48px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── PHASE TABS ── */
+  .phase-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    scrollbar-width: none;
+  }
+  .phase-nav::-webkit-scrollbar { display: none; }
+  .phase-tab {
+    padding: 12px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .phase-tab:hover { color: var(--text); }
+  .phase-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .phase-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(240,180,41,0.15);
+    color: var(--gold);
+    font-size: 10px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 200px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .sidebar-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 20px 12px;
+  }
+  .phase-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .phase-link:hover { background: rgba(255,255,255,0.03); }
+  .phase-link.active {
+    background: rgba(240,180,41,0.06);
+    border-left-color: var(--gold);
+  }
+  .phase-link .p-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .phase-link .p-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+  .phase-link.active .p-label { color: var(--gold); }
+  .phase-link .p-num {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  /* ── FLOW CONTENT ── */
+  .flow-content {
+    padding: 32px 40px;
+    overflow-y: auto;
+  }
+
+  /* ── PHASE SECTION ── */
+  .phase-section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .phase-section.visible { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  .phase-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .phase-header-text h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .phase-header-text p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .law-ref {
+    display: inline-block;
+    background: rgba(240,180,41,0.1);
+    border: 1px solid rgba(240,180,41,0.2);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+
+  /* ── FLOW NODES ── */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: relative;
+  }
+
+  /* Connector line */
+  .step-connector {
+    width: 2px;
+    background: var(--border);
+    margin: 0 auto;
+    flex-shrink: 0;
+    min-height: 24px;
+    position: relative;
+    left: 137px;
+  }
+  .step-connector.branch { background: linear-gradient(to bottom, var(--border), transparent); }
+
+  /* Step card */
+  .step-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    width: 100%;
+    margin: 0 0 0 0;
+  }
+  .step-card:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .step-card.expanded {
+    border-color: rgba(240,180,41,0.3);
+    box-shadow: 0 0 0 1px rgba(240,180,41,0.1);
+  }
+
+  /* Department badge */
+  .dept-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .dept-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .step-title .chevron {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .step-card.expanded .chevron { transform: rotate(180deg); }
+
+  .step-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  /* Expanded details */
+  .step-details {
+    display: none;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .step-card.expanded .step-details { display: block; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .detail-box {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .detail-box h5 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .detail-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  .detail-box ul li {
+    font-size: 12px;
+    color: #c4cdd6;
+    padding: 2px 0;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .detail-box ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-weight: bold;
+  }
+  .detail-box p {
+    font-size: 12px;
+    color: #c4cdd6;
+    line-height: 1.5;
+  }
+
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .tag-law { background: rgba(240,180,41,0.1); color: var(--gold); border: 1px solid rgba(240,180,41,0.2); }
+  .tag-doc { background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+  .tag-system { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+  .tag-time { background: rgba(244,63,94,0.1); color: #fb7185; border: 1px solid rgba(244,63,94,0.2); }
+
+  /* Decision diamond */
+  .decision-node {
+    background: rgba(244,63,94,0.07);
+    border: 1px dashed rgba(244,63,94,0.35);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: center;
+    width: 100%;
+  }
+  .decision-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 4px;
+  }
+  .decision-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .decision-paths {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+  .decision-path {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: default;
+  }
+  .path-yes { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  .path-no { background: rgba(244,63,94,0.12); color: #fb7185; border: 1px solid rgba(244,63,94,0.2); }
+  .path-alt { background: rgba(240,180,41,0.1); color: var(--gold); border: 1px solid rgba(240,180,41,0.2); }
+
+  /* Parallel steps */
+  .parallel-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+  @media (max-width: 700px) { .parallel-group { grid-template-columns: 1fr; } }
+  .parallel-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    padding: 6px 0;
+    width: 100%;
+  }
+
+  /* Step number */
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-right: 6px;
+  }
+
+  /* System note */
+  .system-note {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .system-note-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .system-note-text { font-size: 12px; color: #6ee7b7; line-height: 1.5; }
+  .system-note-text strong { color: #34d399; }
+
+  /* Footer stats */
+  .stats-bar {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 16px 48px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Scrollbar */
+  .flow-content::-webkit-scrollbar { width: 4px; }
+  .flow-content::-webkit-scrollbar-track { background: transparent; }
+  .flow-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Tooltip */
+  .tooltip-trigger { text-decoration: underline dotted; cursor: help; }
+
+  /* Print */
+  @media print {
+    .phase-nav, .sidebar, .stats-bar { display: none; }
+    .main { grid-template-columns: 1fr; }
+    .phase-section { display: block !important; }
+  }
+
+  /* ── My custom styles ── */
+  .my-link {
+    color: var(--gold);
+    text-decoration: none !important;
+  }
+  .float-l {
+  	display: inline-block;
+    float: left;
+  }
+  .float-r {
+  	display: inline-block;
+    float: right;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Republic Act No. 12009 — NGPA</div>
+  <h1>Digital <span>Project Procurement</span><br>Management System</h1>
+  <p>End-to-end procurement process flow — from end-user purchase request through supplier delivery and payment, fully aligned with the New Government Procurement Act.</p>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--d-user)"></div> End-User / Implementing Unit</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--d-budget)"></div> Budget Office</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--d-proc)"></div> Procurement Office / BAC</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--d-supplier)"></div> Suppliers / Bidders</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--d-accounting)"></div> Accounting / Finance</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--d-supplies)"></div> Supplies / Property Office</div>
+</div>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-title">Process Phases</div>
+    <div class="phase-link active" onclick="showPhase(1,this)">
+      <div class="p-icon" style="background:rgba(59,130,246,0.12)">📋</div>
+      <div><div class="p-num">Phase 1</div><div class="p-label">Procurement Planning</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(2,this)">
+      <div class="p-icon" style="background:rgba(240,180,41,0.12)">💰</div>
+      <div><div class="p-num">Phase 2</div><div class="p-label">Budget & Funding</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(3,this)">
+      <div class="p-icon" style="background:rgba(244,63,94,0.12)">📑</div>
+      <div><div class="p-num">Phase 3</div><div class="p-label">Bidding Documents & Pre-Procurement</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(4,this)">
+      <div class="p-icon" style="background:rgba(16,185,129,0.12)">🏷️</div>
+      <div><div class="p-num">Phase 4</div><div class="p-label">Invitation to Bid & Bidding</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(5,this)">
+      <div class="p-icon" style="background:rgba(139,92,246,0.12)">⚖️</div>
+      <div><div class="p-num">Phase 5</div><div class="p-label">Bid Evaluation & Post-Qualification</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(6,this)">
+      <div class="p-icon" style="background:rgba(240,180,41,0.12)">🏆</div>
+      <div><div class="p-num">Phase 6</div><div class="p-label">Award & Contract</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(7,this)">
+      <div class="p-icon" style="background:rgba(249,115,22,0.12)">🚚</div>
+      <div><div class="p-num">Phase 7</div><div class="p-label">Implementation & Delivery</div></div>
+    </div>
+    <div class="phase-link" onclick="showPhase(8,this)">
+      <div class="p-icon" style="background:rgba(139,92,246,0.12)">💳</div>
+      <div><div class="p-num">Phase 8</div><div class="p-label">Acceptance & Payment</div></div>
+    </div>
+  </div>
+
+  <!-- FLOW CONTENT -->
+  <div class="flow-content">
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 1: PROCUREMENT PLANNING
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section visible" id="phase-1">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(59,130,246,0.12)">📋</div>
+        <div class="phase-header-text">
+          <h2>Phase 1 — Procurement Planning</h2>
+          <p>The end-user identifies the need, prepares technical specifications, conducts market scoping, and submits for inclusion in the Annual Procurement Plan.</p>
+          <span class="law-ref">RA 12009 — Article II, Secs. 7–13</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(59,130,246,0.1);color:#60a5fa;"><div class="dept-dot" style="background:var(--d-user)"></div>End-User / Implementing Unit</div>
+          <div class="step-title"><span><span class="step-number">1</span>Identify Need & Initiate Purchase Request</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">End-user unit identifies requirement and formally prepares a Purchase Request (PR) with initial technical specifications.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Required Documents</h5>
+                <ul>
+                  <li>Purchase Request (PR) Form</li>
+                  <li>Initial Technical Specifications</li>
+                  <li>Statement of Need / Justification</li>
+                  <li>Estimated Cost / Cost Estimate</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>System Actions</h5>
+                <ul>
+                  <li>Create PR in digital system</li>
+                  <li>Auto-assign PR number</li>
+                  <li>Route to Budget Office for pre-check</li>
+                  <li>Tag to relevant APP item (if existing)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 7 — Strategic Procurement Planning</span>
+              <span class="tag tag-doc">PR Form</span>
+              <span class="tag tag-system">System: PR Module</span>
+            </div>
+            <div class="system-note">
+              <div class="system-note-icon">🖥️</div>
+              <div class="system-note-text"><strong>Digital System:</strong> End-user logs into the system, fills in the PR form with description, quantity, estimated cost, and urgency. System auto-validates against the approved APP and budget allocation.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(59,130,246,0.1);color:#60a5fa;"><div class="dept-dot" style="background:var(--d-user)"></div>End-User / Implementing Unit</div>
+          <div class="step-title"><span><span class="step-number">2</span>Market Scoping</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Conduct market scoping to determine cost estimates, specifications, delivery lead times, and available procurement modalities.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Market Scoping Activities</h5>
+                <ul>
+                  <li>Supplier/contractor consultations</li>
+                  <li>Price sourcing from PhilGEPS catalogue</li>
+                  <li>Review of industry journals & references</li>
+                  <li>Analysis of previous similar procurements</li>
+                  <li>Lifecycle cost estimation (LCA/LCCA)</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Outputs</h5>
+                <ul>
+                  <li>Market Scoping Report</li>
+                  <li>Approved Budget for the Contract (ABC)</li>
+                  <li>Recommended procurement modality</li>
+                  <li>Technical specs draft</li>
+                  <li>Delivery/completion schedule estimate</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 10 — Market Scoping</span>
+              <span class="tag tag-law">Sec. 13 — Lifecycle Cost Analysis</span>
+              <span class="tag tag-doc">Market Scoping Report</span>
+              <span class="tag tag-system">PhilGEPS Catalogue</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(59,130,246,0.1);color:#60a5fa;"><div class="dept-dot" style="background:var(--d-user)"></div>End-User / Implementing Unit</div>
+          <div class="step-title"><span><span class="step-number">3</span>Prepare Project Procurement Management Plan (PPMP)</span><span class="float-r"><a class="my-link" href="ppmp_detailed_substeps.html" target="_self">[ Expand process sub-steps &gt; ]</a></span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">End-user unit prepares the PPMP covering the cost estimate, specifications, procurement modality, schedule, and funding source.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>PPMP Contents (Sec. 7)</h5>
+                <ul>
+                  <li>Name of project/procurement</li>
+                  <li>PMO/End-user unit</li>
+                  <li>General description</li>
+                  <li>Procurement method</li>
+                  <li>Bid evaluation criteria</li>
+                  <li>Time schedule</li>
+                  <li>Source of funds</li>
+                  <li>Approved Budget for Contract (ABC)</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Special Considerations</h5>
+                <ul>
+                  <li>Lifecycle & environmental impact</li>
+                  <li>Green procurement criteria</li>
+                  <li>Subcontracting arrangements</li>
+                  <li>Design-and-Build feasibility</li>
+                  <li>Goods must be brand new (Sec. 7)</li>
+                  <li>No brand-name reference (Sec. 11)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 7 — APP & PPMP</span>
+              <span class="tag tag-law">Sec. 11 — Specifications</span>
+              <span class="tag tag-doc">PPMP Form</span>
+              <span class="tag tag-time">Timeline: Part of APP cycle</span>
+              <!-- <span class="tag tag-system float-r"><a class="my-link" href="ppmp_detailed_substeps.html" target="_self">[ Expand process ]</a></span> -->
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>Procurement Office</div>
+          <div class="step-title"><span><span class="step-number">4</span>Consolidate Annual Procurement Plan (APP)</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Procurement Office consolidates all PPMPs from end-user units into the Annual Procurement Plan; HoPE approves.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>APP Requirements</h5>
+                <ul>
+                  <li>All PPMPs consolidated</li>
+                  <li>Within approved annual budget</li>
+                  <li>Approved by HoPE</li>
+                  <li>Posted on PhilGEPS</li>
+                  <li>Consistent with yearly budget</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Early Procurement</h5>
+                <ul>
+                  <li>Allowed for next fiscal year</li>
+                  <li>Based on Indicative APP</li>
+                  <li>No award until funds approved</li>
+                  <li>HoPE must approve Indicative APP</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 7 — APP</span>
+              <span class="tag tag-law">Sec. 12 — Early Procurement</span>
+              <span class="tag tag-system">PhilGEPS: APP Publication</span>
+            </div>
+            <div class="system-note">
+              <div class="system-note-icon">🖥️</div>
+              <div class="system-note-text"><strong>Digital System:</strong> System auto-aggregates all approved PPMPs into the APP dashboard. HoPE reviews and approves digitally. Approved APP auto-published to PhilGEPS via API integration.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 2: BUDGET & FUNDING
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-2">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(240,180,41,0.12)">💰</div>
+        <div class="phase-header-text">
+          <h2>Phase 2 — Budget & Funding</h2>
+          <p>Budget Office validates availability of funds, issues Certificate of Fund Availability (CFA), and coordinates with Accounting for obligation.</p>
+          <span class="law-ref">RA 12009 — Secs. 7, 9 | DBM / GAA Rules</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(240,180,41,0.1);color:#fbbf24;"><div class="dept-dot" style="background:var(--d-budget)"></div>Budget Office</div>
+          <div class="step-title"><span><span class="step-number">5</span>Review Purchase Request & Verify Budget Allocation</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Budget Office reviews the PR against the approved APP and annual budget. Verifies if the item is included in the APP.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Budget Checks</h5>
+                <ul>
+                  <li>PR must be in the APP</li>
+                  <li>Available budget vs. ABC</li>
+                  <li>Correct allotment class</li>
+                  <li>Multi-year contractual authority (if applicable)</li>
+                  <li>Fund source validation</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Documents Issued</h5>
+                <ul>
+                  <li>Certificate of Fund Availability (CFA) / Budget Utilization Request (BUR)</li>
+                  <li>Allotment Release Order (ARO)</li>
+                  <li>Obligational Authority (for multi-year: MYCA from DBM)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 7 — Procurement within budget</span>
+              <span class="tag tag-law">Sec. 9 — Multi-Year Contracting (MYCA)</span>
+              <span class="tag tag-doc">CFA / BUR</span>
+              <span class="tag tag-system">System: Budget Module</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div style="width:100%">
+          <div class="decision-node">
+            <div class="decision-label">⬡ Decision Gate</div>
+            <div class="decision-text">Is the procurement in the APP and is budget available?</div>
+            <div class="decision-paths">
+              <span class="decision-path path-yes">✓ YES — Proceed to Pre-Procurement</span>
+              <span class="decision-path path-no">✗ NO — Return to End-User / Revise PPMP or wait for APP amendment</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(140,92,246,0.1);color:#a78bfa;"><div class="dept-dot" style="background:var(--d-accounting)"></div>Accounting Office</div>
+          <div class="step-title"><span><span class="step-number">6</span>Pre-Obligation / Budget Reservation</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Accounting Office earmarks / pre-obligates the budget to prevent double-spending. Records the obligation in the accounting system.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Actions</h5>
+                <ul>
+                  <li>Record budget reservation/pre-obligation</li>
+                  <li>Assign Obligation Request (ObR) number</li>
+                  <li>Link ObR to PR and ABC</li>
+                  <li>Coordinate with Budget on fund release</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Documents</h5>
+                <ul>
+                  <li>Obligation Request and Status (ORS)</li>
+                  <li>Registry of Allotments and Obligations</li>
+                  <li>Disbursement Voucher (pre-filled header)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-doc">ORS / ObR</span>
+              <span class="tag tag-system">System: Accounting Module — IFMIS integration</span>
+              <span class="tag tag-law">Sec. 21 — Electronic Payment System (IFMIS)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 3: BIDDING DOCUMENTS & PRE-PROCUREMENT
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-3">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(244,63,94,0.12)">📑</div>
+        <div class="phase-header-text">
+          <h2>Phase 3 — Bidding Documents & Pre-Procurement</h2>
+          <p>BAC determines the procurement mode, prepares bidding documents, holds a pre-procurement conference, and ensures readiness for public bidding.</p>
+          <span class="law-ref">RA 12009 — Articles V, VI, VII | Secs. 26, 41–42, 47–49</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>Procurement Office / BAC</div>
+          <div class="step-title"><span><span class="step-number">7</span>Determine Mode of Procurement</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC reviews the PPMP/APP and determines the appropriate procurement mode based on the nature, amount, and urgency of the procurement.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>RA 12009 Procurement Modes (Sec. 26)</h5>
+                <ul>
+                  <li><strong>Competitive Bidding</strong> — default mode</li>
+                  <li><strong>Limited Source Bidding</strong> — specialized goods</li>
+                  <li><strong>Competitive Dialogue</strong> — complex/innovative (NEW)</li>
+                  <li><strong>Direct Contracting</strong> — proprietary</li>
+                  <li><strong>Small Value Procurement</strong> — ≤ ₱2M</li>
+                  <li><strong>Negotiated Procurement</strong> — specific grounds</li>
+                  <li><strong>Direct Procurement for STI</strong> — startups (NEW)</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Decision Factors</h5>
+                <ul>
+                  <li>ABC / contract value</li>
+                  <li>Nature and complexity of goods/service</li>
+                  <li>Urgency / emergency</li>
+                  <li>Availability in PS-DBM catalogue</li>
+                  <li>Number of eligible suppliers</li>
+                  <li>GPPB Decision Tree (Sec. 6)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 26 — Modes of Procurement</span>
+              <span class="tag tag-law">Sec. 6 — GPPB Decision Tree</span>
+              <span class="tag tag-law">Sec. 40 — CSE from PS-DBM</span>
+            </div>
+            <div class="system-note">
+              <div class="system-note-icon">🖥️</div>
+              <div class="system-note-text"><strong>Digital System:</strong> Built-in GPPB-compliant decision tree guides BAC/Procurement Officer in selecting the correct mode based on inputs. System auto-checks if item is available in PS-DBM/PhilGEPS catalogue first.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC + End-User Unit</div>
+          <div class="step-title"><span><span class="step-number">8</span>Prepare Bidding Documents</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC (with the end-user unit) prepares the complete bidding documents following GPPB standard forms.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Bidding Document Contents (Sec. 47)</h5>
+                <ul>
+                  <li>Approved Budget for the Contract (ABC)</li>
+                  <li>Invitation to Bid (ITB)</li>
+                  <li>Instructions to Bidders (eligibility, evaluation criteria, LCRB or MEARB)</li>
+                  <li>Terms of Reference / Scope of Work</li>
+                  <li>Eligibility Requirements</li>
+                  <li>Plans & Technical Specifications</li>
+                  <li>Price Form & Bill of Quantities</li>
+                  <li>Delivery / Completion Schedule</li>
+                  <li>Bid Security form & amount</li>
+                  <li>Performance Security form & amount</li>
+                  <li>Form of Contract & Special/General Conditions</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Key Requirements</h5>
+                <ul>
+                  <li>Use GPPB standard forms only</li>
+                  <li>No brand-name references (Sec. 11)</li>
+                  <li>Specify: LCRB or MEARB award criteria</li>
+                  <li>If MEARB: define quality-price ratio (min 15%, max 40% for price)</li>
+                  <li>Include green procurement criteria (Sec. 73)</li>
+                  <li>Disclose relations affidavit requirement (Sec. 81)</li>
+                  <li>Include beneficial ownership declaration requirement (Sec. 82)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 47 — Bidding Documents</span>
+              <span class="tag tag-law">Sec. 48 — Access to Information</span>
+              <span class="tag tag-law">Sec. 61 — MEARB Criteria</span>
+              <span class="tag tag-doc">GPPB Standard Forms</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC</div>
+          <div class="step-title"><span><span class="step-number">9</span>Pre-Procurement Conference</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC holds a mandatory pre-procurement conference to validate readiness, confirm fund availability, and review bidding documents before publication.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Conference Agenda (Sec. 49)</h5>
+                <ul>
+                  <li>Confirm fund certification (CFA)</li>
+                  <li>Confirm technical specs completeness</li>
+                  <li>Determine LCRB vs. MEARB award criterion</li>
+                  <li>Review draft ITB and bidding documents</li>
+                  <li>Set bidding schedule and milestones</li>
+                  <li>Confirm observer invitations</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Attendees</h5>
+                <ul>
+                  <li>BAC members</li>
+                  <li>End-user unit / implementing unit</li>
+                  <li>BAC Secretariat</li>
+                  <li>Consultants (if any)</li>
+                  <li>COA representative (optional)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 49 — Pre-Procurement Conference</span>
+              <span class="tag tag-law">Sec. 38 — Video Recording (mandatory for large procurements)</span>
+              <span class="tag tag-doc">Minutes of Pre-Procurement Conference</span>
+            </div>
+            <div class="system-note">
+              <div class="system-note-icon">🎥</div>
+              <div class="system-note-text"><strong>Mandatory Video Recording (Sec. 38):</strong> For Goods &gt; ₱10M, Infrastructure &gt; ₱20M, Consulting &gt; ₱5M — system must initiate and manage video recording. Stored for 5 years; accessible to public upon request.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 4: INVITATION TO BID & BIDDING
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-4">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(16,185,129,0.12)">🏷️</div>
+        <div class="phase-header-text">
+          <h2>Phase 4 — Invitation to Bid & Bidding Process</h2>
+          <p>Publication of the Invitation to Bid, pre-bid conference, eligibility screening, bid submission, and public bid opening.</p>
+          <span class="law-ref">RA 12009 — Articles VII–VIII | Secs. 50–58</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC / Procurement Office</div>
+          <div class="step-title"><span><span class="step-number">10</span>Publish Invitation to Bid (ITB)</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Post ITB continuously for 7 calendar days across all required channels simultaneously.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Publication Channels (Sec. 50)</h5>
+                <ul>
+                  <li>PhilGEPS — <strong>primary & mandatory</strong></li>
+                  <li>Agency website</li>
+                  <li>Agency social media platforms (new)</li>
+                  <li>Conspicuous place in agency premises</li>
+                  <li>Newspaper of national circulation (fallback only)</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>ITB Must Contain (Sec. 50)</h5>
+                <ul>
+                  <li>Brief description of procurement</li>
+                  <li>Eligibility criteria and evaluation method</li>
+                  <li>LCRB or MEARB award basis</li>
+                  <li>Deadlines for eligibility, pre-bid, bid opening</li>
+                  <li>ABC and source of funds</li>
+                  <li>Bidding document availability period & cost</li>
+                  <li>Contract duration</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 50 — Publication (7 calendar days)</span>
+              <span class="tag tag-system">PhilGEPS Auto-Post via API</span>
+              <span class="tag tag-time">Duration: 7 consecutive calendar days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC</div>
+          <div class="step-title"><span><span class="step-number">11</span>Pre-Bid Conference</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC holds at least one pre-bid conference at least 12 calendar days before the bid deadline. Prospective bidders may request additional conferences.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Conference Conduct (Sec. 51)</h5>
+                <ul>
+                  <li>Clarify bidding documents</li>
+                  <li>BAC may assist bidders in document prep (new under RA 12009)</li>
+                  <li>Issue Supplemental Bid Bulletins if needed</li>
+                  <li>All clarifications made in writing</li>
+                  <li>COA representative invited</li>
+                  <li>At least 2 external observers invited</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Observers Required (Sec. 43)</h5>
+                <ul>
+                  <li>1 from relevant private sector group</li>
+                  <li>1 from CSO or people's organization</li>
+                  <li>COA representative</li>
+                  <li>Must have no conflict of interest</li>
+                  <li>Must submit separate observer's report to HoPE, PhilGEPS, and COA</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 51 — Pre-Bid Conference (≥12 days before deadline)</span>
+              <span class="tag tag-law">Sec. 43 — Observers</span>
+              <span class="tag tag-doc">Minutes of Pre-Bid Conference</span>
+              <span class="tag tag-time">Held: ≥12 calendar days before bid deadline</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(16,185,129,0.1);color:#6ee7b7;"><div class="dept-dot" style="background:var(--d-supplier)"></div>Suppliers / Bidders</div>
+          <div class="step-title"><span><span class="step-number">12</span>Eligibility Screening</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Prospective bidders submit eligibility documents. BAC screens based on the valid and updated PhilGEPS Certificate of Registration and Membership.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Eligibility Documents (Sec. 52)</h5>
+                <ul>
+                  <li>Valid PhilGEPS Certificate of Registration & Membership (primary document)</li>
+                  <li>Legal Eligibility (permits, licenses, registrations)</li>
+                  <li>Technical Eligibility (experience, track record)</li>
+                  <li>Financial Eligibility (capacity)</li>
+                  <li>Sworn Disclosure of Relations (Sec. 81)</li>
+                  <li>Beneficial Ownership Declaration (Sec. 82)</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>System Checks</h5>
+                <ul>
+                  <li>Cross-check PhilGEPS registration status</li>
+                  <li>Verify against GPPB blacklist/suspension list</li>
+                  <li>Verify BIR tax clearance (via interconnected database, Sec. 23)</li>
+                  <li>CIAP/PCAB license check (for infrastructure)</li>
+                  <li>Beneficial ownership registry check</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 52 — Eligibility Requirements</span>
+              <span class="tag tag-law">Sec. 81 — Disclosure of Relations</span>
+              <span class="tag tag-law">Sec. 82 — Beneficial Ownership</span>
+              <span class="tag tag-law">Sec. 23 — Systems Interconnectivity</span>
+              <span class="tag tag-system">PhilGEPS Integration</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(16,185,129,0.1);color:#6ee7b7;"><div class="dept-dot" style="background:var(--d-supplier)"></div>Suppliers / Bidders</div>
+          <div class="step-title"><span><span class="step-number">13</span>Bid Submission</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Eligible bidders submit bids in two separate sealed envelopes (or electronic equivalent): Technical Component and Financial Component, with Bid Security.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Envelope 1 — Technical (Sec. 54)</h5>
+                <ul>
+                  <li>Technical specifications compliance</li>
+                  <li>Organizational chart & personnel</li>
+                  <li>Track record / experience documents</li>
+                  <li>Equipment list (if applicable)</li>
+                  <li>Project methodology / work plan</li>
+                  <li>Sworn Disclosure of Relations</li>
+                  <li>Beneficial Ownership form</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Envelope 2 — Financial (Sec. 54)</h5>
+                <ul>
+                  <li>Bid Form with unit and total prices</li>
+                  <li>Bill of Quantities (infrastructure)</li>
+                  <li>Bid Security (callable-on-demand)</li>
+                  <li>Price must be ≤ ABC (ceiling)</li>
+                  <li>No minimum price floor</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 54 — Bid Submission</span>
+              <span class="tag tag-law">Sec. 56 — Bid Security (callable-on-demand)</span>
+              <span class="tag tag-system">Optional: Electronic submission via PhilGEPS</span>
+              <span class="tag tag-time">Deadline: Fixed by BAC in ITB</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC</div>
+          <div class="step-title"><span><span class="step-number">14</span>Bid Opening (Public)</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC publicly opens all bids no later than 1 calendar day after the bid submission deadline. Livestreamed to the public.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Bid Opening Process (Sec. 58)</h5>
+                <ul>
+                  <li>Held: not later than 1 day after deadline</li>
+                  <li>All bids opened publicly</li>
+                  <li>Technical envelopes opened first</li>
+                  <li>Financial envelopes opened only for technically compliant bids</li>
+                  <li>Bid prices recorded in Abstract of Bids</li>
+                  <li>Minutes prepared and made public</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Transparency Requirements</h5>
+                <ul>
+                  <li>COA representative present</li>
+                  <li>External observers present</li>
+                  <li>Video recording — mandatory for large procurements (Sec. 38)</li>
+                  <li>Livestreamed on agency website/social media (Sec. 38)</li>
+                  <li>Open to any prospective bidder/public</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 58 — Bid Opening</span>
+              <span class="tag tag-law">Sec. 38 — Video Recording & Livestreaming</span>
+              <span class="tag tag-doc">Abstract of Bids; Minutes of Bid Opening</span>
+              <span class="tag tag-time">Held: ≤1 calendar day after submission deadline</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 5: BID EVALUATION & POST-QUALIFICATION
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-5">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(139,92,246,0.12)">⚖️</div>
+        <div class="phase-header-text">
+          <h2>Phase 5 — Bid Evaluation & Post-Qualification</h2>
+          <p>BAC evaluates bids (technical pass/fail, then financial ranking or quality-price scoring), conducts post-qualification of the winning bidder, and determines the LCRB, MEARB, or HRRB.</p>
+          <span class="law-ref">RA 12009 — Articles IX–X | Secs. 59–65</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC / TWG</div>
+          <div class="step-title"><span><span class="step-number">15</span>Preliminary Examination of Bids (Pass/Fail)</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC checks if all required documents in the technical component are present. Bids with complete documents proceed to financial evaluation.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Pass/Fail Criteria (Sec. 59)</h5>
+                <ul>
+                  <li>Completeness of required documents</li>
+                  <li>Proper signatures/notarization</li>
+                  <li>Bid Security submitted and valid</li>
+                  <li>Joint Venture agreement (if applicable)</li>
+                  <li>Disclosure affidavits present</li>
+                  <li>Technical compliance with specifications</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Timeline</h5>
+                <ul>
+                  <li>Full evaluation process (Sec. 61): within 7 calendar days from deadline for receipt of proposals</li>
+                  <li>TWG may be created to assist BAC in technical evaluation</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 59 — Preliminary Examination</span>
+              <span class="tag tag-time">Full evaluation: within 7 calendar days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC / TWG</div>
+          <div class="step-title"><span><span class="step-number">16</span>Financial Bid Evaluation (LCRB or MEARB)</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC evaluates financial components using either the Lowest Calculated Responsive Bid (LCRB) or Most Economically Advantageous Responsive Bid (MEARB) method.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>LCRB Method (Sec. 61)</h5>
+                <ul>
+                  <li>Bids ranked from lowest to highest calculated price</li>
+                  <li>Lowest = Lowest Calculated Bid (LCB)</li>
+                  <li>Must be ≤ ABC (price ceiling)</li>
+                  <li>No lower limit on price</li>
+                  <li>Used for straightforward goods/infra</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>MEARB Method (Sec. 61) — NEW</h5>
+                <ul>
+                  <li>Quality-price ratio evaluation</li>
+                  <li>Price weight: minimum 15%, max 40%</li>
+                  <li>Quality criteria: technical merit, aesthetics, accessibility, social/environmental, delivery conditions, disposal</li>
+                  <li>Best overall score = MEAB</li>
+                  <li>Used for complex/high-value/quality-sensitive procurements</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 60 — ABC as ceiling</span>
+              <span class="tag tag-law">Sec. 61 — LCRB / MEARB evaluation</span>
+              <span class="tag tag-law">Sec. 62 — Consulting (HRB)</span>
+              <span class="tag tag-doc">Abstract of Bids; BAC Resolution</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC / TWG</div>
+          <div class="step-title"><span><span class="step-number">17</span>Post-Qualification</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC verifies and validates that the bidder with the LCB/MEAB/HRB meets all requirements in the bidding documents. Must be completed within 12 calendar days.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Post-Qual Verification (Sec. 63)</h5>
+                <ul>
+                  <li>Verify legal eligibility documents</li>
+                  <li>Verify technical eligibility (experience, equipment)</li>
+                  <li>Verify financial capacity</li>
+                  <li>Site visit / inspection (if needed)</li>
+                  <li>Cross-check with government databases (BIR, DTI, CIAP, SEC via Sec. 23)</li>
+                  <li>Verify beneficial ownership declarations</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Outcomes</h5>
+                <ul>
+                  <li><strong>Pass:</strong> Bid declared LCRB / MEARB / HRRB</li>
+                  <li><strong>Fail:</strong> Post-disqualified; proceed to next-ranked bidder</li>
+                  <li>Repeat until LCRB/MEARB/HRRB determined or all bidders disqualified (→ Failed Bidding)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 63 — Post-Qualification (≤12 calendar days)</span>
+              <span class="tag tag-law">Sec. 64 — Failure of Bidding</span>
+              <span class="tag tag-time">Must complete within 12 calendar days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div style="width:100%">
+          <div class="decision-node">
+            <div class="decision-label">⬡ Decision Gate</div>
+            <div class="decision-text">Is a responsive bidder found after post-qualification?</div>
+            <div class="decision-paths">
+              <span class="decision-path path-yes">✓ YES — Proceed to Award</span>
+              <span class="decision-path path-no">✗ Failure of Bidding — Re-bid (2nd bidding)</span>
+              <span class="decision-path path-alt">After 2nd failure → Negotiated Procurement (Sec. 35)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 6: AWARD & CONTRACT
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-6">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(240,180,41,0.12)">🏆</div>
+        <div class="phase-header-text">
+          <h2>Phase 6 — Award & Contract Execution</h2>
+          <p>BAC recommends award to HoPE; Notice of Award issued; winning bidder posts performance security; contract is signed; Notice to Proceed is issued.</p>
+          <span class="law-ref">RA 12009 — Article XI | Secs. 66–71</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>BAC → HoPE</div>
+          <div class="step-title"><span><span class="step-number">18</span>BAC Recommends Award to HoPE</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">BAC prepares a resolution recommending contract award to the LCRB/MEARB/HRRB bidder and transmits to HoPE (or duly authorized representative) for approval.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>BAC Resolution Must Include</h5>
+                <ul>
+                  <li>Name of winning bidder</li>
+                  <li>Award basis (LCRB, MEARB, or HRRB)</li>
+                  <li>Contract amount (≤ ABC)</li>
+                  <li>Summary of evaluation results</li>
+                  <li>Observers' reports attached</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>HoPE Action (Sec. 66)</h5>
+                <ul>
+                  <li>Approve or disapprove within 10 calendar days</li>
+                  <li>Disapproval must be in writing with valid, reasonable, and justifiable grounds (copy to BAC)</li>
+                  <li>GOCCs: Board action within 20 days</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 66 — Notice & Execution of Award</span>
+              <span class="tag tag-law">Sec. 42(h) — BAC Recommendation</span>
+              <span class="tag tag-doc">BAC Resolution; Notice of Award</span>
+              <span class="tag tag-time">HoPE action: ≤10 calendar days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(16,185,129,0.1);color:#6ee7b7;"><div class="dept-dot" style="background:var(--d-supplier)"></div>Winning Bidder / Supplier</div>
+          <div class="step-title"><span><span class="step-number">19</span>Notice of Award (NOA) Issued & Bidder Accepts</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">HoPE issues the Notice of Award to the winning bidder. Bidder formally accepts within the period stated in the bidding documents.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>After NOA Issuance</h5>
+                <ul>
+                  <li>Winning bidder notified immediately</li>
+                  <li>Other bidders notified (bid securities returned)</li>
+                  <li>NOA posted on PhilGEPS and agency website</li>
+                  <li>Bidder must accept and post performance security within 10 calendar days</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Period of Action on Procurement (Sec. 67)</h5>
+                <ul>
+                  <li>Bid opening → contract award: ≤60 calendar days</li>
+                  <li>GPPB may extend up to 90 calendar days</li>
+                  <li>BAC members on "jury duty" until NOA issued</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 66 — NOA issuance</span>
+              <span class="tag tag-law">Sec. 67 — 60-day period of action</span>
+              <span class="tag tag-doc">Notice of Award (NOA)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(16,185,129,0.1);color:#6ee7b7;"><div class="dept-dot" style="background:var(--d-supplier)"></div>Winning Bidder</div>
+          <div class="step-title"><span><span class="step-number">20</span>Post Performance Security</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Winning bidder posts the required Performance Security before contract signing. Form and amount specified in the bidding documents / GPPB guidelines.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Acceptable Forms (Sec. 68)</h5>
+                <ul>
+                  <li>Cash or cashier's check</li>
+                  <li>Manager's check</li>
+                  <li>Bank draft / guarantee</li>
+                  <li>Irrevocable standby letter of credit</li>
+                  <li>Surety bond from IC-identified surety company (callable-on-demand)</li>
+                  <li>GSIS bond</li>
+                  <li>For special sectors (Sec. 76): performance securing declaration</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Key Requirements</h5>
+                <ul>
+                  <li>Posted within 10 calendar days of NOA</li>
+                  <li>Must remain effective until final acceptance</li>
+                  <li>IC-verified surety companies only</li>
+                  <li>Callable-on-demand surety bonds (new requirement)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 68 — Performance Security</span>
+              <span class="tag tag-time">Posted within 10 calendar days of NOA</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(244,63,94,0.1);color:#fb7185;"><div class="dept-dot" style="background:var(--d-proc)"></div>Procurement Office + Supplier</div>
+          <div class="step-title"><span><span class="step-number">21</span>Contract Signing & Notice to Proceed (NTP)</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Winning bidder formally enters into contract within 10 calendar days of NOA. Notice to Proceed issued within 3 calendar days of contract approval.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Contract Signing (Sec. 66)</h5>
+                <ul>
+                  <li>Within 10 calendar days of NOA receipt</li>
+                  <li>Higher authority approval: 15 calendar days (NGAs) / 20 days (GOCCs)</li>
+                  <li>Disapproval must be in writing</li>
+                  <li>Contract includes liquidated damages clause (Sec. 97)</li>
+                  <li>Fixed-price contract; price escalation only with GPPB approval</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Notice to Proceed (NTP)</h5>
+                <ul>
+                  <li>Issued within 3 calendar days of contract approval</li>
+                  <li>Effective only upon receipt by contractor</li>
+                  <li>Marks start of contract implementation period</li>
+                  <li>Warranty period begins from this point</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 66 — Contract Execution</span>
+              <span class="tag tag-law">Sec. 89 — Fixed Contract Prices</span>
+              <span class="tag tag-law">Sec. 97 — Liquidated Damages clause</span>
+              <span class="tag tag-doc">Contract Agreement; NTP</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 7: IMPLEMENTATION & DELIVERY
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-7">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(249,115,22,0.12)">🚚</div>
+        <div class="phase-header-text">
+          <h2>Phase 7 — Contract Implementation & Delivery</h2>
+          <p>Supplier/contractor delivers goods or performs services according to contract terms. Procuring entity monitors performance and inspects deliverables.</p>
+          <span class="law-ref">RA 12009 — Articles XI, XVIII | Secs. 71, 89–90</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(16,185,129,0.1);color:#6ee7b7;"><div class="dept-dot" style="background:var(--d-supplier)"></div>Supplier / Contractor</div>
+          <div class="step-title"><span><span class="step-number">22</span>Delivery / Performance of Contract</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Supplier delivers goods or performs services per the agreed schedule in the contract. All deliveries must be brand new unless specifically excepted.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Supplier Obligations</h5>
+                <ul>
+                  <li>Deliver to specified locations on schedule</li>
+                  <li>Goods must be brand new (Sec. 7)</li>
+                  <li>Comply with technical specifications</li>
+                  <li>Maintain quality standards throughout</li>
+                  <li>For subcontracting: prior HoPE approval (Sec. 7)</li>
+                  <li>Subcontractors must meet eligibility criteria</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Monitoring</h5>
+                <ul>
+                  <li>End-user/PMO monitors delivery schedule</li>
+                  <li>Record deliveries in system</li>
+                  <li>Flag delays (liquidated damages may apply)</li>
+                  <li>For Infrastructure: CPES applied to subcontractors (Sec. 7)</li>
+                  <li>Procurement monitoring report (BAC, semiannual)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 71 — Contract Implementation (per IRR)</span>
+              <span class="tag tag-law">Sec. 89 — Fixed prices</span>
+              <span class="tag tag-law">Sec. 97 — Liquidated Damages</span>
+              <span class="tag tag-system">System: Delivery Tracking Module</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(249,115,22,0.1);color:#fb923c;"><div class="dept-dot" style="background:var(--d-supplies)"></div>Supplies / Property Office + End-User</div>
+          <div class="step-title"><span><span class="step-number">23</span>Inspection, Testing & Acceptance</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Inspection and Acceptance Committee (IAC) or designated officer inspects and tests the delivered goods or completed work against technical specifications and contract terms.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Inspection Process</h5>
+                <ul>
+                  <li>Inspect quantity vs. delivery receipt</li>
+                  <li>Test quality vs. specifications</li>
+                  <li>Check for defects or damage</li>
+                  <li>Verify brand new condition (Sec. 7)</li>
+                  <li>Verify completeness of accessories, manuals</li>
+                  <li>Infrastructure: joint inspection with contractor</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Acceptance Documents</h5>
+                <ul>
+                  <li>Inspection and Acceptance Report (IAR)</li>
+                  <li>Certificate of Acceptance</li>
+                  <li>Property Acknowledgment Receipt (PAR) / ICS</li>
+                  <li>Report of Survey (if partial rejection)</li>
+                  <li>Deficiency notice (if items rejected)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 90 — Warranty</span>
+              <span class="tag tag-doc">IAR; Certificate of Acceptance</span>
+              <span class="tag tag-system">System: Inventory & Warehouse Module (Sec. 19)</span>
+            </div>
+            <div class="system-note">
+              <div class="system-note-icon">📦</div>
+              <div class="system-note-text"><strong>Cloud-Based Inventory (Sec. 19):</strong> Accepted items automatically updated in the cloud-based inventory system coordinated with DICT. Property accountability records maintained digitally.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div style="width:100%">
+          <div class="decision-node">
+            <div class="decision-label">⬡ Decision Gate</div>
+            <div class="decision-text">Are all delivered items accepted (fully compliant with specs)?</div>
+            <div class="decision-paths">
+              <span class="decision-path path-yes">✓ Fully Accepted — Proceed to Payment</span>
+              <span class="decision-path path-no">✗ Partial/Rejection — Return to Supplier for Replacement / Apply Liquidated Damages</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         PHASE 8: ACCEPTANCE & PAYMENT
+    ════════════════════════════════════════════════ -->
+    <div class="phase-section" id="phase-8">
+      <div class="phase-header">
+        <div class="phase-icon" style="background:rgba(139,92,246,0.12)">💳</div>
+        <div class="phase-header-text">
+          <h2>Phase 8 — Acceptance & Payment Processing</h2>
+          <p>Final acceptance, payment document preparation, obligation, electronic payment to supplier, and warranty monitoring.</p>
+          <span class="law-ref">RA 12009 — Secs. 21, 90 | COA & DBM Rules</span>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(249,115,22,0.1);color:#fb923c;"><div class="dept-dot" style="background:var(--d-supplies)"></div>End-User + Supplies / Property Office</div>
+          <div class="step-title"><span><span class="step-number">24</span>Final Acceptance & Issuance of IAR</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">End-user unit and property office formally accept the goods/services and issue the Inspection and Acceptance Report, which triggers the payment process.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Acceptance Documents</h5>
+                <ul>
+                  <li>Signed Inspection & Acceptance Report (IAR)</li>
+                  <li>Certificate of Completion (infrastructure)</li>
+                  <li>Final Acceptance Certificate</li>
+                  <li>Property Acknowledgment Receipt or ICS</li>
+                  <li>Updated inventory records</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Warranty Activation (Sec. 90)</h5>
+                <ul>
+                  <li>Warranty period starts from final acceptance</li>
+                  <li>Retention money held until warranty expires</li>
+                  <li>For infrastructure: contractor assumes full responsibility</li>
+                  <li>Defects must be repaired within 90 calendar days</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 90 — Warranty (Goods & Infrastructure)</span>
+              <span class="tag tag-doc">IAR; Certificate of Acceptance</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(249,115,22,0.1);color:#fb923c;"><div class="dept-dot" style="background:var(--d-supplies)"></div>End-User / Implementing Unit</div>
+          <div class="step-title"><span><span class="step-number">25</span>Prepare Payment Documents</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">End-user unit prepares and forwards all supporting documents for payment processing to the Accounting Office.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Payment Document Package</h5>
+                <ul>
+                  <li>Disbursement Voucher (DV)</li>
+                  <li>Contract / Purchase Order copy</li>
+                  <li>Sales Invoice / Official Receipt</li>
+                  <li>Delivery Receipts</li>
+                  <li>Inspection & Acceptance Report (IAR)</li>
+                  <li>Certificate of Acceptance</li>
+                  <li>Obligation Request & Status (ORS)</li>
+                  <li>PhilGEPS Reference Number</li>
+                  <li>Performance Security reference</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Compliance Checks</h5>
+                <ul>
+                  <li>Documents routed to Accounting via system</li>
+                  <li>COA auditing requirements compliance</li>
+                  <li>Tax withholding computation</li>
+                  <li>Supplier's BIR/TIN verification</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-doc">DV; IAR; OR/SI; ORS</span>
+              <span class="tag tag-system">System: Document Management & Routing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(139,92,246,0.1);color:#a78bfa;"><div class="dept-dot" style="background:var(--d-accounting)"></div>Accounting Office</div>
+          <div class="step-title"><span><span class="step-number">26</span>Accounting Review, Obligation & Processing</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Accounting Office reviews documents for completeness, correctness, and compliance; records the obligation; prepares for payment.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Accounting Actions</h5>
+                <ul>
+                  <li>Review payment documents for completeness</li>
+                  <li>Verify obligation vs. available budget</li>
+                  <li>Record journal entries</li>
+                  <li>Compute withholding taxes (EWT, VAT)</li>
+                  <li>Certify availability of funds</li>
+                  <li>Sign Disbursement Voucher</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>COA Pre-Audit (if required)</h5>
+                <ul>
+                  <li>COA resident auditor review (for applicable amounts)</li>
+                  <li>COA audit trail maintained in PhilGEPS (Sec. 22)</li>
+                  <li>COA can verify system security at any time</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 22 — PhilGEPS audit trail for COA</span>
+              <span class="tag tag-doc">DV with complete certifications</span>
+              <span class="tag tag-system">IFMIS / eNGAS integration</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(139,92,246,0.1);color:#a78bfa;"><div class="dept-dot" style="background:var(--d-accounting)"></div>Accounting / Finance Office</div>
+          <div class="step-title"><span><span class="step-number">27</span>Electronic Payment to Supplier</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">Finance Office processes the electronic payment to the supplier through the government's Integrated Financial Management Information System (IFMIS).</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Electronic Payment (Sec. 21)</h5>
+                <ul>
+                  <li>Uniform electronic payment system (IFMIS)</li>
+                  <li>Developed by DBM, COA, and DOF jointly</li>
+                  <li>Net of withholding taxes</li>
+                  <li>Retention money withheld (warranty period)</li>
+                  <li>Payment confirmed and recorded</li>
+                  <li>PhilGEPS updated with payment completion</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Post-Payment</h5>
+                <ul>
+                  <li>Official Receipt / Acknowledgment from supplier</li>
+                  <li>Update books of accounts</li>
+                  <li>Record in Registry of Disbursements</li>
+                  <li>BIR Form 2307 (Certificate of Creditable Tax Withheld)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 21 — Electronic Payment System (IFMIS)</span>
+              <span class="tag tag-system">IFMIS / LandBank / DBM ePayment</span>
+              <span class="tag tag-time">Payment within 15 days of acceptance (COA rules)</span>
+            </div>
+            <div class="system-note">
+              <div class="system-note-icon">💳</div>
+              <div class="system-note-text"><strong>IFMIS Integration (Sec. 21):</strong> The digital procurement system must interface seamlessly with DBM's IFMIS for payment processing. PhilGEPS updated automatically upon payment completion for full transparency.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-connector"></div>
+
+        <div class="step-card" onclick="toggleStep(this)">
+          <div class="dept-badge" style="background:rgba(249,115,22,0.1);color:#fb923c;"><div class="dept-dot" style="background:var(--d-supplies)"></div>All Departments</div>
+          <div class="step-title"><span><span class="step-number">28</span>Warranty Monitoring, Retention Release & Case Closure</span><span class="chevron">▾</span></div>
+          <div class="step-subtitle">System monitors the warranty period, tracks defect reports, and releases retention money/performance security upon expiry of the warranty and full compliance.</div>
+          <div class="step-details">
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h5>Warranty Monitoring (Sec. 90)</h5>
+                <ul>
+                  <li>System auto-tracks warranty expiry dates</li>
+                  <li>End-user reports defects through system</li>
+                  <li>Contractor notified automatically</li>
+                  <li>Repair deadline tracked (90-day clock)</li>
+                  <li>Government undertakes repair if contractor defaults</li>
+                </ul>
+              </div>
+              <div class="detail-box">
+                <h5>Case Closure</h5>
+                <ul>
+                  <li>Release retention money after warranty period</li>
+                  <li>Release performance security upon final acceptance</li>
+                  <li>Update procurement monitoring report (BAC, semiannual)</li>
+                  <li>PhilGEPS record of contract completion</li>
+                  <li>Update CPES for contractor (infrastructure)</li>
+                  <li>Archive documents (retain for COA audit)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="step-tags">
+              <span class="tag tag-law">Sec. 90 — Warranty Period & Retention</span>
+              <span class="tag tag-law">Sec. 42(j) — BAC Procurement Monitoring Report</span>
+              <span class="tag tag-system">System: Warranty Tracker; CPES integration (Sec. 23)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /flow-content -->
+</div><!-- /main -->
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Process Phases</div></div>
+  <div class="stat-item"><div class="stat-num">28</div><div class="stat-lbl">Process Steps</div></div>
+  <div class="stat-item"><div class="stat-num">6</div><div class="stat-lbl">Departments / Offices</div></div>
+  <div class="stat-item"><div class="stat-num">11</div><div class="stat-lbl">Procurement Modes (RA 12009)</div></div>
+  <div class="stat-item"><div class="stat-num">23</div><div class="stat-lbl">RA 12009 Articles</div></div>
+  <div class="stat-item"><div class="stat-num">117</div><div class="stat-lbl">Sections in the Law</div></div>
+</div>
+
+<script>
+  function toggleStep(card) {
+    card.classList.toggle('expanded');
+  }
+
+  function showPhase(num, linkEl) {
+    // Hide all phases
+    document.querySelectorAll('.phase-section').forEach(s => s.classList.remove('visible'));
+    // Show target phase
+    document.getElementById('phase-' + num).classList.add('visible');
+    // Update sidebar links
+    document.querySelectorAll('.phase-link').forEach(l => l.classList.remove('active'));
+    linkEl.classList.add('active');
+    // Scroll flow content to top
+    document.querySelector('.flow-content').scrollTop = 0;
+  }
+</script>
+
+</body>
+</html>
